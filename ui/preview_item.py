@@ -1,37 +1,45 @@
 from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout, QStyle, QPushButton
-from PySide6.QtGui import QColor, QPalette, QPixmap
-from PySide6.QtCore import QSize
+from PySide6.QtGui import QColor, QPalette
+from PySide6.QtCore import QSize, Signal
+
+from ui.image import PixMap
 
 class PreviewItem(QWidget):
-    def __init__(self, image = None, page_no = None):
-        super().__init__()
-        self.setAutoFillBackground(True)
-        palette = self.palette()
-        palette.setColor(QPalette.ColorRole.Window, QColor('green'))
-        self.setPalette(palette)
-        
+    removeRequested = Signal(QWidget)
+    def __init__(self, curr_size:int = 100, image = None, page_no = None):
+        super().__init__()   
         layout = QHBoxLayout()
         
-        page_label = QLabel("Pg. " + str(page_no))
+        self.page_label = QLabel("Pg. " + str(page_no))
         
-        image = QLabel()
-        pixmap = QPixmap('test/download.jpg')
-        image.setPixmap(pixmap)
-        image.setFixedSize(pixmap.size())
+        self.image_label = QLabel()
+        self.pixmap = PixMap('test/download.jpg')
+        scaled = self.pixmap.scaled(curr_size)
+        self.image_label.setPixmap(scaled)
+        self.image_label.setFixedSize(scaled.size())
         
         button = QPushButton()
         pixmap_icon = QStyle.StandardPixmap.SP_DialogDiscardButton
         icon = self.style().standardIcon(pixmap_icon)
-
         button.setIconSize(QSize(16, 16))
         button.setIcon(icon)
+        button.clicked.connect(self.remove_clicked)
 
-        layout.addWidget(page_label)
+        layout.addWidget(self.page_label)
         layout.addStretch()
-        layout.addWidget(image)
+        layout.addWidget(self.image_label)
         layout.addStretch()
         layout.addWidget(button)
         
         self.setLayout(layout)
+    
+    def update_page_no(self, page_no:int):
+        self.page_label.setText("Pg. " + str(page_no))
         
+    def update_image_size(self, new_size): 
+        scaled = self.pixmap.scaled(new_size)
+        self.image_label.setPixmap(scaled)
+        self.image_label.setFixedSize(scaled.size())
         
+    def remove_clicked(self):
+        return self.removeRequested.emit(self)
