@@ -2,8 +2,7 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt
 
 class PixMap():
-    def __init__(self, path='test/download.jpg', scale:int=100):
-        self.scale = 100
+    def __init__(self, path='test/download.jpg'):
         self.image = QPixmap(path)
         self.width = self.image.width()
         self.height = self.image.height()

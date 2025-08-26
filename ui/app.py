@@ -13,9 +13,14 @@ class MainWindow(QMainWindow):
         splitter = QSplitter(Qt.Horizontal)
         splitter.addWidget(Preview())
         splitter.addWidget(QWidget())
-        
-        #create custom qsplitterhandle?
+
+        # create custom qsplitterhandle with indicating lines?
         splitter.setHandleWidth(10)
+        splitter.setStyleSheet("""
+            QSplitter::handle {
+                background: red;
+            }
+        """)
 
         splitter.setSizes([500, 200])
         layout.addWidget(splitter)

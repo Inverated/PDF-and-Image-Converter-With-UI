@@ -6,14 +6,17 @@ from ui.image import PixMap
 
 class PreviewItem(QWidget):
     removeRequested = Signal(QWidget)
-    def __init__(self, curr_size:int = 100, image = None, page_no = None):
+    def __init__(self, page_no, document_name:str = None, image = None, curr_size:int = 100):
         super().__init__()   
         layout = QHBoxLayout()
         
+        self.page_no = page_no
+        self.document_name = document_name
+
         self.page_label = QLabel("Pg. " + str(page_no))
         
         self.image_label = QLabel()
-        self.pixmap = PixMap('test/download.jpg')
+        self.pixmap = PixMap(image)
         scaled = self.pixmap.scaled(curr_size)
         self.image_label.setPixmap(scaled)
         self.image_label.setFixedSize(scaled.size())
