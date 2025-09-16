@@ -1,5 +1,6 @@
-from PySide6.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QSplitter
+from PySide6.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QSplitter
 from PySide6.QtCore import Qt
+from ui.file_tab_widget import SideList
 from ui.preview_widget import Preview
 
 
@@ -12,13 +13,13 @@ class MainWindow(QMainWindow):
 
         splitter = QSplitter(Qt.Horizontal)
         splitter.addWidget(Preview())
-        splitter.addWidget(QWidget())
+        splitter.addWidget(SideList())
 
         # create custom qsplitterhandle with indicating lines?
         splitter.setHandleWidth(10)
         splitter.setStyleSheet("""
             QSplitter::handle {
-                background: red;
+                background: dark-gray;
             }
         """)
 

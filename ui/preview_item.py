@@ -1,13 +1,12 @@
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QStyle, QPushButton, QFrame
-from PySide6.QtGui import QDrag
+from PySide6.QtGui import QDrag, QImage
 from PySide6.QtCore import QSize, Signal, Qt, QMimeData
 
-from ui.drag_widget import DragTargetIndicator
 from ui.image import PixMap
 
 class PreviewItem(QWidget):
     removeRequested = Signal(QWidget)
-    def __init__(self, page_no:int, document_name:str, document_page_range:list = None, image = None, curr_size:int = 100):
+    def __init__(self, page_no:int, document_name:str, document_page_range:list = None, image:QImage = None, curr_size:int = 100):
         super().__init__()   
         layout = QHBoxLayout()
         

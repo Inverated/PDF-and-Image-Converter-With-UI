@@ -1,9 +1,9 @@
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QPixmap, QImage
 from PySide6.QtCore import Qt
 
 class PixMap():
-    def __init__(self, path='test/download.jpg'):
-        self.image = QPixmap(path)
+    def __init__(self, q_image:QImage):
+        self.image = QPixmap.fromImage(q_image)
         self.width = self.image.width()
         self.height = self.image.height()
     
