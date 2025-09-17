@@ -2,7 +2,8 @@ from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QStyle,
 from PySide6.QtGui import QDrag, QImage
 from PySide6.QtCore import QSize, Signal, Qt, QMimeData
 
-from ui.image import PixMap
+from ui.display.image import PixMap
+
 
 class PreviewItem(QWidget):
     removeRequested = Signal(QWidget)
@@ -20,6 +21,7 @@ class PreviewItem(QWidget):
         
         self.image_stack = QVBoxLayout()
         
+        # Visual indicator for drag and drop
         top_indicator, bottom_indicator = QFrame(), QFrame()
         top_indicator.setFrameShape(QFrame.HLine)
         top_indicator.setFrameShadow(QFrame.Sunken)
@@ -28,6 +30,8 @@ class PreviewItem(QWidget):
         top_indicator.hide()
         bottom_indicator.hide()
         
+        
+        # Add dash if page ranges
         image_title = str(self.document_name) + " Page "
         if self.document_page_range[0] == self.document_page_range[1]:
             image_title += str(self.document_page_range[0])
@@ -35,6 +39,8 @@ class PreviewItem(QWidget):
             image_title += str(self.document_page_range[0]) + ' - ' + str(self.document_page_range[1])
         self.image_title = QLabel(image_title)
         
+        
+        # Image (Change to preview at lower resolution from file list?)
         self.image_label = QLabel()
         self.original_image = PixMap(self.image)
         scaled = self.original_image.scaled(self.curr_size)

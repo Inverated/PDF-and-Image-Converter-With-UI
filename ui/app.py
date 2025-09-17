@@ -1,7 +1,8 @@
 from PySide6.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QSplitter
 from PySide6.QtCore import Qt
-from ui.file_tab_widget import SideList
-from ui.preview_widget import Preview
+
+from ui.display.preview_widget import Preview
+from ui.files.file_tab_widget import SideList
 
 
 class MainWindow(QMainWindow):

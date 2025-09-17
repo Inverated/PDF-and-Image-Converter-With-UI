@@ -1,8 +1,8 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QScrollArea
 from PySide6.QtGui import QDropEvent, QDragMoveEvent
-from ui.preview_item import PreviewItem
-from ui.size_slider import SizeSliderLayout
 
+from ui.display.preview_item import PreviewItem
+from ui.display.size_slider import SizeSliderLayout
 class Preview(QWidget):
     def __init__(self):
         super().__init__()
