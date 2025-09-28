@@ -1,8 +1,9 @@
 from os.path import splitext
 
 from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout, QStyle, QPushButton
-from PySide6.QtGui import QImage
-from PySide6.QtCore import QSize
+from PySide6.QtGui import QImage, QDrag, QPixmap
+from PySide6.QtCore import QSize, Qt, QMimeData
+
 import fitz
 
 from ui.display.preview_item import PreviewItem
@@ -74,7 +75,17 @@ class File(QWidget):
                                           image=qimg))
         return image_list
             
+    def mouseMoveEvent(self, event):
+        if event.buttons() == Qt.MouseButton.LeftButton:
+            drag = QDrag(self)
+            mime = QMimeData()
+            mime.setText(self.file_name())
+            drag.setMimeData(mime)
+            #Preview drag
+            drag.setPixmap(self.image_list[0].image_label.pixmap())
             
+            drag.exec(Qt.DropAction.MoveAction)
+
         
         
         

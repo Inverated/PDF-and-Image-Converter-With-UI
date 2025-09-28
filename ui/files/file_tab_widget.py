@@ -6,7 +6,9 @@ from ui.files.file import File
 
 class SideList(QWidget):
     def __init__(self):
-        super().__init__()        
+        super().__init__()      
+        self.setAcceptDrops(True)  
+  
         layout = QVBoxLayout()
         self.setStyleSheet("background-color: blue;")
         # Top row
@@ -51,5 +53,7 @@ class SideList(QWidget):
     def add_files(self):
         print(123)
         
-        
-        
+    def dragEnterEvent(self, event):
+        event.accept()
+        #do nothing, just hides error cursor
+

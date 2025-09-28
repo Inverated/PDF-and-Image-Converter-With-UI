@@ -100,4 +100,7 @@ class PreviewItem(QWidget):
     def set_bottom_indicator(self, show:bool):
         qline = self.image_stack.itemAt(self.image_stack.count() - 1).widget()
         qline.show() if show else qline.hide()
+        
+    def copyOf(self):
+        return PreviewItem(self.page_no, self.document_name, self.document_page_range, self.image, self.curr_size)
 

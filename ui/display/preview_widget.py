@@ -3,6 +3,7 @@ from PySide6.QtGui import QDropEvent, QDragMoveEvent
 
 from ui.display.preview_item import PreviewItem
 from ui.display.size_slider import SizeSliderLayout
+from ui.files.file import File
 class Preview(QWidget):
     def __init__(self):
         super().__init__()
@@ -39,7 +40,7 @@ class Preview(QWidget):
         self.size_slider = SizeSliderLayout(image_size=self.image_size)
         
         self.size_slider.connect(self.update_size)
-        self.implement_widget_connection()
+        self.implementWidgetConnection()
         
         option_bar.addWidget(compact_checkbox)
         option_bar.addStretch()
@@ -49,12 +50,11 @@ class Preview(QWidget):
         layout.addLayout(option_bar)
         self.setLayout(layout)
     
-    def implement_widget_connection(self):
+    def implementWidgetConnection(self):
         for i in range(self.widget_stack.count()):
             preview_item_wid:PreviewItem = self.widget_stack.itemAt(i).widget()
             self.size_slider.connect(preview_item_wid.update_image_size)
             preview_item_wid.removeRequested.connect(self.remove_page)
-        
         
     def update_size(self, value):
         self.image_size = value
@@ -86,18 +86,18 @@ class Preview(QWidget):
             if start not in new_stack:
                 new_stack.append(start)
                         
-            self.clear_widget_stack(new_stack)
+            self.__clear_widget_stack(new_stack)
             for each in new_stack:
                 self.widget_stack.addWidget(each)
                 
             self.reset_page_no()
-            self.implement_widget_connection()
+            self.implementWidgetConnection()
         
         elif compact == 0:
             #store loaded data in list of list for pdf pages? and retrieve to uncompact 
             return
                 
-    def clear_widget_stack(self, new_stack):
+    def __clear_widget_stack(self, new_stack):
         while self.widget_stack.count():
             item = self.widget_stack.takeAt(0)
             widget = item.widget()
@@ -107,12 +107,11 @@ class Preview(QWidget):
     def dragEnterEvent(self, event):
         event.accept()
     
-    def find_target_location(self, event:QDropEvent | QDragMoveEvent):
+    def __findTargetLocation(self, event:QDropEvent | QDragMoveEvent):
         pos = event.position().toPoint()
         container_pos = self.widget_stack.parentWidget().mapFrom(self, pos)
         
         n = 0
-        
         for n in range(self.widget_stack.count()):
             each:PreviewItem = self.widget_stack.itemAt(n).widget()
             
@@ -124,25 +123,44 @@ class Preview(QWidget):
         return n
     
     def dropEvent(self, event:QDropEvent):
-        if self.widget_stack.count() < 2:
+        type_of = type(event.source())
+        if type_of == File:
+            self.__addFromFileList(event)
+        elif type_of == PreviewItem:
+            self.__reorderInternalItems(event)
+        
+        event.accept()
+        self.resetIndicators()
+        self.reset_page_no()
+    
+    def __addFromFileList(self, event:QDropEvent):
+        widget:File = event.source()
+        n = self.__findTargetLocation(event)
+
+        if self.widget_stack.count() == 0:
+            n = 0
+            
+        for i, item in enumerate(widget.image_list):
+            self.widget_stack.insertWidget(n + i, item.copyOf())
+        self.implementWidgetConnection()
+
+
+    def __reorderInternalItems(self, event:QDropEvent):
+        if self.widget_stack.count() <= 1:
+            #no use sorting if 1 item
             return
         
         widget:PreviewItem = event.source()        
         self.widget_stack.removeWidget(widget)
         
-        n = self.find_target_location(event)
-
+        n = self.__findTargetLocation(event)
         self.widget_stack.insertWidget(n, widget)
-        event.accept()
-        
-        self.reset_indicators()
-        self.reset_page_no()
         
     def dragMoveEvent(self, event:QDragMoveEvent):
-        if self.widget_stack.count() < 2:
+        if self.widget_stack.count() == 0:
             return 
         
-        n = self.find_target_location(event)
+        n = self.__findTargetLocation(event)
         
         if n == self.widget_stack.count():
             widget:PreviewItem = self.widget_stack.itemAt(n - 1).widget()
@@ -154,9 +172,9 @@ class Preview(QWidget):
         widget.set_top_indicator(show=True)
         
         if n == 0:
-            temp:PreviewItem = self.widget_stack.itemAt(n+1).widget()
-            temp.set_top_indicator(show=False)
-            
+            if self.widget_stack.count() != 1:
+                temp:PreviewItem = self.widget_stack.itemAt(n+1).widget()
+                temp.set_top_indicator(show=False)
         elif n == self.widget_stack.count() - 1:
             temp:PreviewItem = self.widget_stack.itemAt(n-1).widget()
             temp.set_top_indicator(show=False)
@@ -172,14 +190,14 @@ class Preview(QWidget):
         
         event.accept()
     
-    def reset_indicators(self):
+    def resetIndicators(self):
         for n in range(self.widget_stack.count()):
             widget:PreviewItem = self.widget_stack.itemAt(n).widget()
             widget.set_bottom_indicator(show=False)
             widget.set_top_indicator(show=False)
     
     def dragLeaveEvent(self, event):
-        self.reset_indicators()
+        self.resetIndicators()
         event.accept()
             
             
