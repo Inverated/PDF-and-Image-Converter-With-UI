@@ -1,3 +1,4 @@
+import os
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QStyle
 from PySide6.QtCore import QSize
 
@@ -30,8 +31,11 @@ class SideList(QWidget):
         selection_area = QScrollArea()
         container = QWidget()
         file_stack = QVBoxLayout()
-        for i in range(6):
-            file_stack.addWidget(File('test/download{}.jpg'.format(i + 1)))
+        
+        testFiles = self.openTestFiles()
+        for each in testFiles:
+            file_stack.addWidget(each)
+        
         
         container.setLayout(file_stack)
         selection_area.setWidget(container)
@@ -57,3 +61,12 @@ class SideList(QWidget):
         event.accept()
         #do nothing, just hides error cursor
 
+    #open from test dir
+    def openTestFiles(self) -> list[File]:
+        files = []
+        contents = os.listdir('test')
+        for each in contents:
+            ext = each[-3:]
+            if ext == 'jpg' or ext == 'pdf':
+                files.append(File('test/' + each))
+        return files

@@ -22,9 +22,10 @@ class File(QWidget):
         basename, self.extension = splitext(path_name)
         self.document_name = basename.split('/')[-1]
         
-        if self.extension == 'pdf':
+        if self.extension == '.pdf':
             self.image_list: list[PreviewItem] = self.__convert_pdf_to_list()        
         else:
+            #assume everything else is image?
             self.image_list: list[PreviewItem] = self.__convert_image_to_list()
         
         self.page_count = len(self.image_list)
