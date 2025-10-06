@@ -1,7 +1,6 @@
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QStyle, QPushButton, QFrame
 from PySide6.QtGui import QDrag, QImage
 from PySide6.QtCore import QSize, Signal, Qt, QMimeData
-
 from ui.display.image import PixMap
 
 

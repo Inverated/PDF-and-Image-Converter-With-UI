@@ -1,10 +1,9 @@
 from os.path import splitext
 
 from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout, QStyle, QPushButton
-from PySide6.QtGui import QImage, QDrag, QPixmap
+from PySide6.QtGui import QImage, QDrag, QPainter
 from PySide6.QtCore import QSize, Qt, QMimeData
-
-import fitz
+from PySide6.QtPdf import QPdfDocument, QPdfDocumentRenderOptions
 
 from ui.display.preview_item import PreviewItem
 
@@ -52,7 +51,7 @@ class File(QWidget):
         return "{}{}\t{} page(s)".format(self.document_name, self.extension, self.page_count)
         
     
-    def __convert_image_to_list(self, ) -> list[PreviewItem]:
+    def __convert_image_to_list(self) -> list[PreviewItem]:
         page_range = [1,1]
         image = QImage(self.path_name)
         return [PreviewItem(page_no=1, document_name=self.document_name,
@@ -60,20 +59,39 @@ class File(QWidget):
                             image=image)]
          
     def __convert_pdf_to_list(self) -> list[PreviewItem]:
-        doc = fitz.open(self.path_name)
-        
+        doc = QPdfDocument()
+        doc.load(self.path_name)
         image_list: list[PreviewItem] = []
         
-        for page_no in range(len(doc)):
+        for page_no in range(doc.pageCount()):
             curr_page = page_no + 1
             page_range = [curr_page, curr_page]
+            page_size = doc.pagePointSize(page_no)
             
-            pixmap:fitz.Pixmap = doc.load_page(page_no).get_pixmap()
-            qimg = QImage(pixmap.samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format_RGB888)
+            width, height = int(page_size.width()), int(page_size.height())
+
+            options = QPdfDocumentRenderOptions()
+            options.antialiasing = True
+            options.textAntialiasing = True
+
+            rendered_page = doc.render(page_no, QSize(width, height), options)
+
+            # create a white background image
+            image = QImage(width, height, QImage.Format_RGB32)
+            image.fill(Qt.white)
+
+            # Paint the rendered page on top of the white background
+            painter = QPainter(image)
+            painter.drawImage(0, 0, rendered_page)
+            painter.end()
+
+                    
+            #pixmap:fitz.Pixmap = doc.load_page(page_no).get_pixmap()
+            #qimg = QImage(pixmap.samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format_RGB888)
             
             image_list.append(PreviewItem(page_no=curr_page, document_name=self.document_name, 
                                           document_page_range=page_range, curr_size=self.initial_page_size,
-                                          image=qimg))
+                                          image=image))
         return image_list
             
     def mouseMoveEvent(self, event):

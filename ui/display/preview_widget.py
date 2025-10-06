@@ -141,7 +141,9 @@ class Preview(QWidget):
             n = 0
             
         for i, item in enumerate(widget.image_list):
-            self.widget_stack.insertWidget(n + i, item.copyOf())
+            item_copy = item.copyOf()
+            item_copy.update_image_size(self.image_size)
+            self.widget_stack.insertWidget(n + i, item_copy)
         self.implementWidgetConnection()
 
 
@@ -170,6 +172,7 @@ class Preview(QWidget):
         
         widget:PreviewItem = self.widget_stack.itemAt(n).widget()
         widget.set_top_indicator(show=True)
+        widget.set_bottom_indicator(show=False)
         
         if n == 0:
             if self.widget_stack.count() != 1:
