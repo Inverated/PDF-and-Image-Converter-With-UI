@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QScrollArea
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QScrollArea, QSizePolicy
 from PySide6.QtGui import QDropEvent, QDragMoveEvent
 
 from ui.display.preview_item import PreviewItem
@@ -16,20 +16,12 @@ class Preview(QWidget):
         scroll_area.setWidgetResizable(True)
         
         container = QWidget()
-        
+        container.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
         self.widget_stack = QVBoxLayout()
-        #preview_item_list = [PreviewItem(page_no=i+1, document_page_range=[i+1, i+1], curr_size=self.image_size, document_name = 'download', image='test/download' + str(i + 1) + '.jpg') for i in range(6)]
-        """ for i in range(6):
-            preview_item_list.append(PreviewItem(page_no=i+1, document_page_range=[i+1, i+1], curr_size=self.image_size, document_name = 'download', image='test/download' + str(i + 1) + '.jpg'))
-         """
-        """ for each in preview_item_list:
-            self.widget_stack.addWidget(each)
-            continue """
             
         container.setLayout(self.widget_stack)
         scroll_area.setWidget(container)        
         items.addWidget(scroll_area)
-
 
         option_bar = QHBoxLayout()
         

@@ -11,6 +11,7 @@ from ui.display.preview_item import PreviewItem
 class File(QWidget):
     def __init__(self, path_name):
         super().__init__()
+        self.drag_width_px = 200
         self.setStyleSheet("background-color: red;")
         self.initial_page_size = 100
         
@@ -101,8 +102,11 @@ class File(QWidget):
             mime.setText(self.file_name())
             drag.setMimeData(mime)
             #Preview drag
-            drag.setPixmap(self.image_list[0].image_label.pixmap())
-            
+            image = self.image_list[0].image_label
+            width = image.width()
+            height = image.height()
+            drag.setPixmap(image.pixmap().scaled(self.drag_width_px, height/width * self.drag_width_px, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+
             drag.exec(Qt.DropAction.MoveAction)
 
         

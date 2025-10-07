@@ -8,8 +8,8 @@ class PreviewItem(QWidget):
     removeRequested = Signal(QWidget)
     def __init__(self, page_no:int, document_name:str, document_page_range:list = None, image:QImage = None, curr_size:int = 100):
         super().__init__()   
+        self.drag_width_px = 200
         layout = QHBoxLayout()
-        
         self.page_no = page_no
         self.curr_size = curr_size
         self.document_page_range = document_page_range
@@ -88,10 +88,12 @@ class PreviewItem(QWidget):
             mime = QMimeData()
             drag.setMimeData(mime)
             #Preview drag
-            drag.setPixmap(self.image_label.pixmap())
+            width = self.image_label.width()
+            height = self.image_label.height()
+            drag.setPixmap(self.image_label.pixmap().scaled(self.drag_width_px, height/width * self.drag_width_px, Qt.KeepAspectRatio, Qt.SmoothTransformation))
             
             drag.exec(Qt.DropAction.MoveAction)
-    
+
     def set_top_indicator(self, show:bool):
         qline = self.image_stack.itemAt(0).widget()
         qline.show() if show else qline.hide()
