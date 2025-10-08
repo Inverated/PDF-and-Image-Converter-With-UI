@@ -58,6 +58,9 @@ class SideList(QWidget):
     def add_files(self):
         dialog = QFileDialog()
         selected = dialog.getOpenFileNames(None, "Select 1 or more files to open", dir=self.prev_open_dir, filter="Images/Pdf (*.pdf *.png *.jpg)")
+        if len(selected[0]) == 0:
+            return
+        
         self.prev_open_dir = os.path.dirname(selected[0][0])
         #can make this async and add loading bar to File widget?
         for path in selected[0]:
