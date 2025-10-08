@@ -6,15 +6,16 @@ from ui.display.image import PixMap
 
 class PreviewItem(QWidget):
     removeRequested = Signal(QWidget)
-    def __init__(self, page_no:int, document_name:str, document_page_range:list = None, image:QImage = None, curr_size:int = 100):
+    def __init__(self, page_no:int, document_name:str, document_page_range:list = None, image:QImage = None, curr_size:int = 100, contains:list = None):
         super().__init__()   
         self.drag_width_px = 200
         layout = QHBoxLayout()
-        self.page_no = page_no
+        self.page_no = page_no  #Page order 
         self.curr_size = curr_size
-        self.document_page_range = document_page_range
+        self.document_page_range = document_page_range  #Page of original document
         self.document_name = document_name
         self.image = image
+        self.contains = contains
 
         self.page_label = QLabel("Pg. " + str(page_no))
         
@@ -29,14 +30,8 @@ class PreviewItem(QWidget):
         top_indicator.hide()
         bottom_indicator.hide()
         
-        
-        # Add dash if page ranges
-        image_title = str(self.document_name) + " Page "
-        if self.document_page_range[0] == self.document_page_range[1]:
-            image_title += str(self.document_page_range[0])
-        else:
-            image_title += str(self.document_page_range[0]) + ' - ' + str(self.document_page_range[1])
-        self.image_title = QLabel(image_title)
+        self.image_title = QLabel()
+        self.__set_title()
         
         
         # Image (Change to preview at lower resolution from file list?)
@@ -79,9 +74,30 @@ class PreviewItem(QWidget):
         return self.removeRequested.emit(self)
     
     def compact(self, next):
-        new_range = [self.document_page_range[0], next.document_page_range[1]] 
-        return PreviewItem(self.page_no, self.document_name, new_range, self.image, self.curr_size)
+        self.document_page_range = [self.document_page_range[0], next.document_page_range[1]] 
+        if self.contains == None:
+            self.contains = [next]
+        else:
+            self.contains.append(next)
+        self.__set_title()
+        return self
     
+    def uncompact(self):
+        hidden_stack = self.contains
+        self.contains = None
+        self.document_page_range[1] = self.document_page_range[0]
+        self.__set_title()
+        return hidden_stack
+    
+    def __set_title(self):
+        # Add dash if page ranges
+        image_title = str(self.document_name) + " Page "
+        if self.document_page_range[0] == self.document_page_range[1]:
+            image_title += str(self.document_page_range[0])
+        else:
+            image_title += str(self.document_page_range[0]) + ' - ' + str(self.document_page_range[1])
+        self.image_title.setText(image_title)
+        
     def mouseMoveEvent(self, event):
         if event.buttons() == Qt.MouseButton.LeftButton:
             drag = QDrag(self)
