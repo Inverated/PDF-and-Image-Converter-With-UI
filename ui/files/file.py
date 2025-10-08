@@ -14,6 +14,9 @@ from ui.display.preview_pdf import PreviewPdf
 
 
 class File(QWidget):
+    renderComplete = Signal()
+    renderProgress = Signal(int)
+    
     removeRequested = Signal(QWidget)
     def __init__(self, path_name):
         super().__init__()
@@ -21,6 +24,7 @@ class File(QWidget):
         self.initial_page_size = 100
         
         self.page_count = -1 #initialise
+        self.curr_page_no = 0
         self.image_list:list[PreviewItem] = []
         self.stop_event_thread = threading.Event()
         
@@ -31,10 +35,14 @@ class File(QWidget):
         basename, self.extension = splitext(path_name)
         self.document_name = basename.split('/')[-1]
         
+        # Label tab with name (Create the label before thread as file name will be updated)
+        self.label = QLabel()
+        self.setFileName()
+        
         self.running_thread = threading.Thread(target=self.convert_to_list, daemon=True)
         self.running_thread.start()
-        #error catch if cannot read?
-        
+        self.renderComplete.connect(self.end_thread)
+        self.renderProgress.connect(self.update_progress)
         # Render simple display
         layout = QHBoxLayout()
         
@@ -46,29 +54,30 @@ class File(QWidget):
         
         remove_button.clicked.connect(self.__deleteFile)
         
-        self.label = QLabel()
-        self.setFileName()
         layout.addWidget(self.label)
         
         layout.addStretch()
         layout.addWidget(remove_button)
         self.setLayout(layout)
-      
+    
+    def end_thread(self):
+        self.running_thread.join()
+    
+    def update_progress(self, curr_page_no):
+        self.curr_page_no = curr_page_no
+        self.setFileName()
+        
     def convert_to_list(self):
         if self.extension == '.pdf':
             self.image_list = self.__convert_pdf_to_list()        
         else:
             #assume everything else is image?
             self.image_list = self.__convert_image_to_list()
+
               
-    def setFileName(self):
-        try:
-            self.label.text()
-        except:
-            return
-        
+    def setFileName(self):      
         if self.page_count == -1:
-            self.label.setText("{}{}\t{}".format(self.document_name, self.extension, "Loading...")) 
+            self.label.setText("{}{}\t{}{}".format(self.document_name, self.extension, "Loading...", self.curr_page_no)) 
             self.label.setStyleSheet("color: grey")    
         else:
             self.label.setText("{}{}\t{} page(s)".format(self.document_name, self.extension, self.page_count))
@@ -93,7 +102,7 @@ class File(QWidget):
         image_list: list[PreviewItem] = []
         
         doc_length = doc.pageCount()
-        
+        print(doc_length)
         for page_no in range(doc_length):
             if self.stop_event_thread.is_set():
                 return []
@@ -128,9 +137,15 @@ class File(QWidget):
             image_list.append(PreviewPdf(page_no=curr_page, document_name=self.document_name, 
                                           document_page_range=page_range, curr_size=self.initial_page_size,
                                           image=pixmap))
+            try:
+                self.renderProgress.emit(page_no)
+            except:
+                print("App forcefully quit")
+                return #app quit
             
         self.page_count = doc_length
         self.setFileName()
+        self.renderComplete.emit()
         return image_list
             
     def mouseMoveEvent(self, event):

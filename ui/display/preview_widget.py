@@ -25,16 +25,16 @@ class Preview(QWidget):
 
         option_bar = QHBoxLayout()
         
-        compact_checkbox = QCheckBox()
-        compact_checkbox.setText('Compact View')
-        compact_checkbox.stateChanged.connect(self.set_compact_view)
+        self.compact_checkbox = QCheckBox()
+        self.compact_checkbox.setText('Compact View')
+        self.compact_checkbox.stateChanged.connect(self.set_compact_view)
         
         self.size_slider = SizeSliderLayout(image_size=self.image_size)
         
         self.size_slider.connect(self.update_size)
         self.implementWidgetConnection()
         
-        option_bar.addWidget(compact_checkbox)
+        option_bar.addWidget(self.compact_checkbox)
         option_bar.addStretch()
         option_bar.addLayout(self.size_slider)
         
@@ -147,11 +147,17 @@ class Preview(QWidget):
 
         if self.widget_stack.count() == 0:
             n = 0
-            
-        for i, item in enumerate(widget.image_list):
-            item_copy = item.copyOf()
-            item_copy.update_image_size(self.image_size)
-            self.widget_stack.insertWidget(n + i, item_copy)
+        
+        if self.compact_checkbox.isChecked():
+            first:PreviewItem = widget.image_list[0].copyOf()
+            first.compact_list(widget.image_list[1:])
+            self.widget_stack.insertWidget(n, first)
+        else:
+            for i, item in enumerate(widget.image_list):
+                item_copy:PreviewItem = item.copyOf()
+                item_copy.update_image_size(self.image_size)
+                self.widget_stack.insertWidget(n + i, item_copy)
+                
         self.implementWidgetConnection()
 
 

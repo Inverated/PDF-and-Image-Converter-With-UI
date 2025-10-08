@@ -1,6 +1,5 @@
 from ui.display.preview_item import PreviewItem
 from PySide6.QtWidgets import QLabel
-from PySide6.QtGui import QImage
 
 from ui.display.image import PixMap
 

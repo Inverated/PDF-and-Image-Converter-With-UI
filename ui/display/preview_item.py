@@ -33,7 +33,7 @@ class PreviewItem(QWidget):
         self.image_title = QLabel()
         self.__set_title()
         
-        self.image_label = self.setImage()
+        self.image_label:QLabel = self.setImage()
         
         self.image_stack.addWidget(top_indicator)
         self.image_stack.addWidget(self.image_label, alignment=Qt.AlignHCenter)
@@ -60,8 +60,7 @@ class PreviewItem(QWidget):
         
     def update_image_size(self, new_size): 
         return
-        
-                   
+                  
     def update_page_no(self, page_no:int):
         self.page_label.setText("Pg. " + str(page_no))
         
@@ -74,6 +73,13 @@ class PreviewItem(QWidget):
             self.contains = [next]
         else:
             self.contains.append(next)
+        self.__set_title()
+        return self
+    
+    def compact_list(self, lis:list["PreviewItem"]):
+        self.document_page_range = [self.document_page_range[0], lis[-1].document_page_range[1]]
+        lisCopy = [each.copyOf() for each in lis]
+        self.contains = lisCopy
         self.__set_title()
         return self
     
@@ -101,7 +107,7 @@ class PreviewItem(QWidget):
             #Preview drag
             width = self.image_label.width()
             height = self.image_label.height()
-            #drag.setPixmap(self.image_label.pixmap().scaled(self.drag_width_px, height/width * self.drag_width_px, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            drag.setPixmap(self.image_label.pixmap().scaled(self.drag_width_px, height/width * self.drag_width_px, Qt.KeepAspectRatio, Qt.SmoothTransformation))
             
             drag.exec(Qt.DropAction.MoveAction)
 
