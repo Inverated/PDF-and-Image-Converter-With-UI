@@ -1,5 +1,5 @@
 import os
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QStyle, QFileDialog
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QStyle, QFileDialog, QSizePolicy, QFrame
 from PySide6.QtCore import QSize
 
 from ui.files.file import File
@@ -8,11 +8,12 @@ from ui.files.file import File
 class SideList(QWidget):
     def __init__(self):
         super().__init__()     
-        self.prev_open_dir = "" 
-        self.setAcceptDrops(True)  
-  
+        self.prev_open_dir = ""     #re open open file from same dir
+        self.setMinimumWidth(250)   #cannot shrink below
+
+        self.setAcceptDrops(True)          
         layout = QVBoxLayout()
-        self.setStyleSheet("background-color: blue;")
+
         # Top row
         edit_row = QHBoxLayout()
         add_file_button = QPushButton()
@@ -28,7 +29,10 @@ class SideList(QWidget):
         edit_row.addWidget(add_file_button)
         
         selection_area = QScrollArea()
+        selection_area.setWidgetResizable(True)
+        #selection_area.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
         container = QWidget()
+        container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
         
         # file stack to contain file widget
         self.file_stack = QVBoxLayout()
@@ -57,7 +61,7 @@ class SideList(QWidget):
         self.prev_open_dir = os.path.dirname(selected[0][0])
         #can make this async and add loading bar to File widget?
         for path in selected[0]:
-            self.file_stack.addWidget(File(path))
+            self.__addToStack(File(path))
         
     def dragEnterEvent(self, event):
         event.accept()
@@ -72,5 +76,26 @@ class SideList(QWidget):
             if ext == 'jpg' or ext == 'pdf':
                 files.append(File('test/' + each))
                 
-        for each in files:
-            self.file_stack.addWidget(each)
+        for item in files:
+            self.__addToStack(item)
+            
+            
+    def __addToStack(self, item:File):
+        self.file_stack.addWidget(item)
+        
+        #Adding visual seperation line
+        line = QFrame()
+        line.setFrameShape(QFrame.HLine)
+        line.setFrameShadow(QFrame.Sunken)
+        self.file_stack.addWidget(line)
+        
+        item.removeRequested.connect(self.__removeFile)
+        
+    def __removeFile(self, file:File):
+        index = self.file_stack.indexOf(file)
+        file = self.file_stack.itemAt(index).widget()
+        line = self.file_stack.itemAt(index + 1).widget()
+        
+        file.deleteLater()
+        line.deleteLater()
+        

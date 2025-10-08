@@ -2,18 +2,23 @@ from os.path import splitext
 
 from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout, QStyle, QPushButton
 from PySide6.QtGui import QImage, QDrag, QPainter
-from PySide6.QtCore import QSize, Qt, QMimeData
+from PySide6.QtCore import QSize, Qt, QMimeData, Signal
 from PySide6.QtPdf import QPdfDocument, QPdfDocumentRenderOptions
 
 from ui.display.preview_item import PreviewItem
 
 
 class File(QWidget):
+    removeRequested = Signal(QWidget)
     def __init__(self, path_name):
         super().__init__()
         self.drag_width_px = 200
-        self.setStyleSheet("background-color: red;")
         self.initial_page_size = 100
+        
+        self.setObjectName("fileContainer")
+        self.setStyleSheet("""
+            #fileContainer { border: 2px solid black; }
+        """)
         
         with open(path_name, 'rb') as f:
             self.data = f.read()
@@ -42,6 +47,8 @@ class File(QWidget):
         trash_icon = self.style().standardIcon(trash_pixmap)
         remove_button.setIconSize(QSize(16, 16))
         remove_button.setIcon(trash_icon)
+        
+        remove_button.clicked.connect(self.__deleteFile)
         
         layout.addWidget(label)
         layout.addStretch()
@@ -109,6 +116,6 @@ class File(QWidget):
 
             drag.exec(Qt.DropAction.MoveAction)
 
-        
-        
+    def __deleteFile(self):
+        self.removeRequested.emit(self)
         

@@ -16,15 +16,13 @@ class MainWindow(QMainWindow):
         splitter.addWidget(Preview())
         splitter.addWidget(SideList())
 
+        splitter.setCollapsible(0, False)
+        splitter.setCollapsible(1, False)
         # create custom qsplitterhandle with indicating lines?
-        splitter.setHandleWidth(10)
-        splitter.setStyleSheet("""
-            QSplitter::handle {
-                background: dark-gray;
-            }
-        """)
+        #splitter.setHandleWidth(10)
 
-        splitter.setSizes([500, 200])
+
+        #splitter.setSizes([500, 200])
         layout.addWidget(splitter)
 
         widget = QWidget()

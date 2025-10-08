@@ -7,12 +7,8 @@ from ui.app import MainWindow
 def main():
     app = QApplication(sys.argv)
 
-    window = MainWindow()
-    window.setMinimumHeight(700)
-    window.setMinimumWidth(600)
+    window = MainWindow()    
     
-    window.setMinimumHeight(20)
-    window.setMinimumWidth(100)
     window.show()
     app.exec()
 
