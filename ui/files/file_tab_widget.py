@@ -1,5 +1,5 @@
 import os
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QStyle
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QStyle, QFileDialog
 from PySide6.QtCore import QSize
 
 from ui.files.file import File
@@ -7,7 +7,8 @@ from ui.files.file import File
 
 class SideList(QWidget):
     def __init__(self):
-        super().__init__()      
+        super().__init__()     
+        self.prev_open_dir = "" 
         self.setAcceptDrops(True)  
   
         layout = QVBoxLayout()
@@ -26,18 +27,14 @@ class SideList(QWidget):
         edit_row.addStretch()
         edit_row.addWidget(add_file_button)
         
-        
-        # File list
         selection_area = QScrollArea()
         container = QWidget()
-        file_stack = QVBoxLayout()
         
-        testFiles = self.openTestFiles()
-        for each in testFiles:
-            file_stack.addWidget(each)
+        # file stack to contain file widget
+        self.file_stack = QVBoxLayout()
+        self.__openTestFiles()
         
-        
-        container.setLayout(file_stack)
+        container.setLayout(self.file_stack)
         selection_area.setWidget(container)
         
         
@@ -55,18 +52,25 @@ class SideList(QWidget):
         self.setLayout(layout)
         
     def add_files(self):
-        print(123)
+        dialog = QFileDialog()
+        selected = dialog.getOpenFileNames(None, "Select 1 or more files to open", dir=self.prev_open_dir, filter="Images/Pdf (*.pdf *.png *.jpg)")
+        self.prev_open_dir = os.path.dirname(selected[0][0])
+        #can make this async and add loading bar to File widget?
+        for path in selected[0]:
+            self.file_stack.addWidget(File(path))
         
     def dragEnterEvent(self, event):
         event.accept()
         #do nothing, just hides error cursor
 
     #open from test dir
-    def openTestFiles(self) -> list[File]:
+    def __openTestFiles(self):
         files = []
         contents = os.listdir('test')
         for each in contents:
             ext = each[-3:]
             if ext == 'jpg' or ext == 'pdf':
                 files.append(File('test/' + each))
-        return files
+                
+        for each in files:
+            self.file_stack.addWidget(each)

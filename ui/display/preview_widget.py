@@ -101,7 +101,6 @@ class Preview(QWidget):
             for each in new_stack:
                 self.widget_stack.addWidget(each)           
             
-            
             self.reset_page_no()
             self.implementWidgetConnection()
             return
