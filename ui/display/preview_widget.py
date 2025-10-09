@@ -17,16 +17,16 @@ class Preview(QWidget):
         layout = QVBoxLayout()
             
         items = QVBoxLayout()
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
         
         container = QWidget()
         container.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
         self.widget_stack = QVBoxLayout()
             
         container.setLayout(self.widget_stack)
-        scroll_area.setWidget(container)        
-        items.addWidget(scroll_area)
+        self.scroll_area.setWidget(container)        
+        items.addWidget(self.scroll_area)
 
         option_bar = QHBoxLayout()
         
@@ -127,6 +127,8 @@ class Preview(QWidget):
     def __findTargetLocation(self, event:QDropEvent | QDragMoveEvent):
         pos = event.position().toPoint()
         container_pos = self.widget_stack.parentWidget().mapFrom(self, pos)
+        
+        print(container_pos, self.scroll_area.width(), self.scroll_area.height())   #autoscrolling
         
         n = 0
         for n in range(self.widget_stack.count()):
