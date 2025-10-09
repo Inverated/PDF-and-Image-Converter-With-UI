@@ -17,7 +17,7 @@ class File(QWidget):
     renderProgress = Signal(int)
     
     removeRequested = Signal(QWidget)
-    def __init__(self, path_name):
+    def __init__(self, path_name:str):
         super().__init__()
         self.drag_width_px = 200
         self.initial_page_size = 100
@@ -79,6 +79,8 @@ class File(QWidget):
         self.renderComplete.emit()
 
     def __set_drag_image(self):
+        if len(self.image_list) == 0:
+            return
         cover_image = self.image_list[0].image_label
         width = cover_image.width()
         height = cover_image.height()
@@ -113,7 +115,7 @@ class File(QWidget):
         
         self.page_count = 1
         self.setFileName()
-        return [PreviewImage(page_no=1, document_name=self.document_name,
+        return [PreviewImage(page_no=1, document_name=self.document_name, full_path=self.path_name,
                             document_page_range=page_range, curr_size=self.initial_page_size,
                             image=pixmap)]
          
@@ -143,7 +145,7 @@ class File(QWidget):
 
             pixmap = PixMap(rendered_page, ori_width, ori_height)   #scale back to original size with same resolution
             
-            image_list.append(PreviewPdf(page_no=curr_page, document_name=self.document_name, 
+            image_list.append(PreviewPdf(page_no=curr_page, document_name=self.document_name, full_path=self.path_name,
                                           document_page_range=page_range, curr_size=self.initial_page_size,
                                           image=pixmap))
             try:
@@ -166,7 +168,7 @@ class File(QWidget):
             drag.setMimeData(mime)
             
             if self.drag_image == None:
-                raise "Image not rendered properly"
+                print("Image not rendered properly")
             
             drag.setPixmap(self.drag_image)
 

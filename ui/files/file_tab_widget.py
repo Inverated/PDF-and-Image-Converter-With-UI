@@ -1,10 +1,12 @@
 import os
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QStyle, QFileDialog, QSizePolicy, QFrame
-from PySide6.QtCore import QSize
+from PySide6.QtCore import QSize, Signal
 
 from ui.files.file import File
 
 class SideList(QWidget):
+    downloadFile = Signal()
+    
     def __init__(self):
         super().__init__()     
         self.prev_open_dir = ""     #re open open file from same dir
@@ -40,13 +42,12 @@ class SideList(QWidget):
         container.setLayout(self.file_stack)
         selection_area.setWidget(container)
         
-        
         # Bottom row
         button_row = QHBoxLayout()
         save_button = QPushButton('Save as')
+        save_button.clicked.connect(self.__click_save)
         button_row.addStretch()
-        button_row.addWidget(save_button)
-        
+        button_row.addWidget(save_button)     
         
         layout.addLayout(edit_row)
         layout.addWidget(selection_area, 2)
@@ -100,4 +101,7 @@ class SideList(QWidget):
         
         file.deleteLater()
         line.deleteLater()
+        
+    def __click_save(self):
+        self.downloadFile.emit()
         

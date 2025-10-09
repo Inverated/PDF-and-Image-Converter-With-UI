@@ -5,7 +5,7 @@ from ui.display.image import PixMap
 
 class PreviewItem(QWidget):
     removeRequested = Signal(QWidget)
-    def __init__(self, page_no:int, document_name:str, document_page_range:list = None, image:PixMap = None, curr_size:int = 100, contains:list = None):
+    def __init__(self, page_no:int, document_name:str, full_path:str, document_page_range:list[int] = None, image:PixMap = None, curr_size:int = 100, contains:list = None):
         super().__init__()   
         self.drag_width_px = 200
         layout = QHBoxLayout()
@@ -13,6 +13,7 @@ class PreviewItem(QWidget):
         self.curr_size = curr_size
         self.document_page_range = document_page_range  #Page of original document
         self.document_name = document_name
+        self.full_path = full_path
         self.image = image
         self.contains = contains
 

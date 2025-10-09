@@ -3,8 +3,8 @@ from PySide6.QtWidgets import QLabel
 from ui.display.image import PixMap
 
 class PreviewImage(PreviewItem):
-    def __init__(self, page_no:int, document_name:str, document_page_range:list = None, image:PixMap = None, curr_size:int = 100, contains:list = None):
-        super().__init__(page_no, document_name, document_page_range, image, curr_size, contains)
+    def __init__(self, page_no:int, document_name:str, full_path:str, document_page_range:list = None, image:PixMap = None, curr_size:int = 100, contains:list = None):
+        super().__init__(page_no, document_name, full_path, document_page_range, image, curr_size, contains)
     
     def setImage(self):
         # Image (Change to preview at lower resolution from file list?)
@@ -21,4 +21,4 @@ class PreviewImage(PreviewItem):
         self.image_label.setFixedSize(scaled.size())
         
     def copyOf(self):
-        return PreviewImage(self.page_no, self.document_name, self.document_page_range, self.image, self.curr_size)
+        return PreviewImage(self.page_no, self.document_name, self.full_path, self.document_page_range, self.image, self.curr_size)

@@ -219,5 +219,24 @@ class Preview(QWidget):
     def dragLeaveEvent(self, event):
         self.resetIndicators()
         event.accept()
-            
-            
+        
+    def get_simplified(self):
+        if self.widget_stack.count() == 0:
+            # add prompt user 
+            return
+        
+        start:PreviewItem = self.widget_stack.itemAt(0).widget().copyOf()
+        new_stack:list[PreviewItem] = []
+        
+        for i in range(1, self.widget_stack.count()):
+            curr_item:PreviewItem = self.widget_stack.itemAt(i).widget()
+            if curr_item.document_name == start.document_name and curr_item.document_page_range[0] == start.document_page_range[1] + 1:
+                start = start.compact(curr_item)
+            else:
+                new_stack.append(start)
+                start = curr_item.copyOf()
+        if start not in new_stack:
+            new_stack.append(start)
+        
+        return new_stack
+        
