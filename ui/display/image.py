@@ -9,3 +9,4 @@ class PixMap():
         
     def scaled(self, size:int) -> QPixmap:
         return self.image.scaled(self.width*size/100, self.height*size/100, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+

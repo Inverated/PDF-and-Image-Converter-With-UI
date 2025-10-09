@@ -3,7 +3,7 @@ import threading
 from os.path import splitext
 
 from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout, QStyle, QPushButton
-from PySide6.QtGui import QImage, QDrag, QPainter
+from PySide6.QtGui import QImage, QDrag, QPainter, QPixmap
 from PySide6.QtCore import QSize, Qt, QMimeData, Signal
 from PySide6.QtPdf import QPdfDocument, QPdfDocumentRenderOptions
 
@@ -22,6 +22,7 @@ class File(QWidget):
         super().__init__()
         self.drag_width_px = 200
         self.initial_page_size = 100
+        self.drag_image = None
         
         self.page_count = -1 #initialise
         self.curr_page_no = 0
@@ -62,6 +63,7 @@ class File(QWidget):
     
     def end_thread(self):
         self.running_thread.join()
+        self.__set_drag_image()
     
     def update_progress(self, curr_page_no):
         self.curr_page_no = curr_page_no
@@ -73,7 +75,23 @@ class File(QWidget):
         else:
             #assume everything else is image?
             self.image_list = self.__convert_image_to_list()
+        self.renderComplete.emit()
 
+    def __set_drag_image(self):
+        cover_image = self.image_list[0].image_label
+        width = cover_image.width()
+        height = cover_image.height()
+        
+        scaled_width = self.drag_width_px
+        scaled_height = height/width * self.drag_width_px
+        scaled_drag = cover_image.pixmap().scaled(self.drag_width_px, height/width * self.drag_width_px, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        bg = QPixmap(scaled_width, scaled_height)
+        bg.fill(Qt.white)
+        painter = QPainter(bg)
+        painter.drawPixmap(0, 0, scaled_drag)
+        painter.end()
+        
+        self.drag_image = bg
               
     def setFileName(self):      
         if self.page_count == -1:
@@ -90,6 +108,7 @@ class File(QWidget):
         page_range = [1,1]
         image = QImage(self.path_name)
         pixmap = PixMap(image, image.width(), image.height())
+        
         self.page_count = 1
         self.setFileName()
         return [PreviewImage(page_no=1, document_name=self.document_name,
@@ -102,7 +121,6 @@ class File(QWidget):
         image_list: list[PreviewItem] = []
         
         doc_length = doc.pageCount()
-        print(doc_length)
         for page_no in range(doc_length):
             if self.stop_event_thread.is_set():
                 return []
@@ -120,19 +138,8 @@ class File(QWidget):
             options.textAntialiasing = True
 
             rendered_page = doc.render(page_no, QSize(width, height), options)
-            
-            # create a white background image
-            image = QImage(width, height, QImage.Format_RGB32)
-            image.fill(Qt.white)
 
-            # Paint the rendered page on top of the white background
-            painter = QPainter(image)
-            painter.setRenderHint(QPainter.SmoothPixmapTransform)
-
-            painter.drawImage(0, 0, rendered_page)
-            painter.end()
-                   
-            pixmap = PixMap(image, ori_width, ori_height)   #scale back to original size with same resolution
+            pixmap = PixMap(rendered_page, ori_width, ori_height)   #scale back to original size with same resolution
             
             image_list.append(PreviewPdf(page_no=curr_page, document_name=self.document_name, 
                                           document_page_range=page_range, curr_size=self.initial_page_size,
@@ -145,7 +152,6 @@ class File(QWidget):
             
         self.page_count = doc_length
         self.setFileName()
-        self.renderComplete.emit()
         return image_list
             
     def mouseMoveEvent(self, event):
@@ -156,11 +162,11 @@ class File(QWidget):
             mime = QMimeData()
             mime.setText(self.label.text())
             drag.setMimeData(mime)
-            #Preview drag
-            image = self.image_list[0].image_label
-            width = image.width()
-            height = image.height()
-            drag.setPixmap(image.pixmap().scaled(self.drag_width_px, height/width * self.drag_width_px, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            
+            if self.drag_image == None:
+                raise "Image not rendered properly"
+            
+            drag.setPixmap(self.drag_image)
 
             drag.exec(Qt.DropAction.MoveAction)
 

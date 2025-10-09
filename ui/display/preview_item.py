@@ -77,7 +77,11 @@ class PreviewItem(QWidget):
         return self
     
     def compact_list(self, lis:list["PreviewItem"]):
-        self.document_page_range = [self.document_page_range[0], lis[-1].document_page_range[1]]
+        start = self.document_page_range[0]
+        if len(lis) > 1:
+            self.document_page_range = [start, lis[-1].document_page_range[1]]
+        else:
+            self.document_page_range = [start, start]
         lisCopy = [each.copyOf() for each in lis]
         self.contains = lisCopy
         self.__set_title()
