@@ -46,9 +46,7 @@ class PreviewPdf(PreviewItem):
         if event.buttons() == Qt.MouseButton.LeftButton:
             drag = QDrag(self)
             mime = QMimeData()
-            mime.setColorData(QColor(Qt.white))
             drag.setMimeData(mime)
 
             drag.setPixmap(self.drag_image)
-
             drag.exec(Qt.DropAction.MoveAction)

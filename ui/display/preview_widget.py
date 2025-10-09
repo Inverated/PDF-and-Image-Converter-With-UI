@@ -1,7 +1,9 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QScrollArea, QSizePolicy
 from PySide6.QtGui import QDropEvent, QDragMoveEvent
 
+from ui.display.preview_image import PreviewImage
 from ui.display.preview_item import PreviewItem
+from ui.display.preview_pdf import PreviewPdf
 from ui.display.size_slider import SizeSliderLayout
 from ui.files.file import File
 class Preview(QWidget):
@@ -131,10 +133,10 @@ class Preview(QWidget):
         return n
     
     def dropEvent(self, event:QDropEvent):
-        type_of = type(event.source())
-        if type_of == File:
+        widget = event.source()
+        if isinstance(widget, File):
             self.__addFromFileList(event)
-        elif type_of == PreviewItem:
+        elif isinstance(widget, PreviewItem):
             self.__reorderInternalItems(event)
         
         event.accept()

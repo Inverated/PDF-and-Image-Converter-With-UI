@@ -112,7 +112,6 @@ class PreviewItem(QWidget):
             width = self.image_label.width()
             height = self.image_label.height()
             drag.setPixmap(self.image_label.pixmap().scaled(self.drag_width_px, height/width * self.drag_width_px, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-            
             drag.exec(Qt.DropAction.MoveAction)
 
     def set_top_indicator(self, show:bool):
