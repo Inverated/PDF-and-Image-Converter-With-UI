@@ -1,8 +1,7 @@
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QStyle, QPushButton, QFrame
-from PySide6.QtGui import QDrag, QImage
+from PySide6.QtGui import QDrag
 from PySide6.QtCore import QSize, Signal, Qt, QMimeData
 from ui.display.image import PixMap
-
 
 class PreviewItem(QWidget):
     removeRequested = Signal(QWidget)
@@ -54,11 +53,13 @@ class PreviewItem(QWidget):
         layout.addWidget(button, stretch=0)
                 
         self.setLayout(layout)
-         
+    
     def setImage(self):
+        #Overide
         return None
         
     def update_image_size(self, new_size): 
+        #Overide
         return
                   
     def update_page_no(self, page_no:int):

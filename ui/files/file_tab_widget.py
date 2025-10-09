@@ -4,7 +4,6 @@ from PySide6.QtCore import QSize
 
 from ui.files.file import File
 
-
 class SideList(QWidget):
     def __init__(self):
         super().__init__()     

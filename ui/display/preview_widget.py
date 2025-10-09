@@ -1,11 +1,11 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QScrollArea, QSizePolicy
 from PySide6.QtGui import QDropEvent, QDragMoveEvent
 
-from ui.display.preview_image import PreviewImage
 from ui.display.preview_item import PreviewItem
-from ui.display.preview_pdf import PreviewPdf
 from ui.display.size_slider import SizeSliderLayout
+
 from ui.files.file import File
+
 class Preview(QWidget):
     def __init__(self):
         super().__init__()
@@ -153,6 +153,7 @@ class Preview(QWidget):
         if self.compact_checkbox.isChecked():
             first:PreviewItem = widget.image_list[0].copyOf()
             first.compact_list(widget.image_list[1:])
+            first.update_image_size(self.image_size)
             self.widget_stack.insertWidget(n, first)
         else:
             for i, item in enumerate(widget.image_list):

@@ -12,7 +12,6 @@ from ui.display.preview_image import PreviewImage
 from ui.display.preview_item import PreviewItem
 from ui.display.preview_pdf import PreviewPdf
 
-
 class File(QWidget):
     renderComplete = Signal()
     renderProgress = Signal(int)
@@ -40,11 +39,13 @@ class File(QWidget):
         self.label = QLabel()
         self.setFileName()
         
+        #Load pdf image seperately
         self.running_thread = threading.Thread(target=self.convert_to_list, daemon=True)
         self.running_thread.start()
         self.renderComplete.connect(self.end_thread)
         self.renderProgress.connect(self.update_progress)
         # Render simple display
+        
         layout = QHBoxLayout()
         
         remove_button = QPushButton()
@@ -87,6 +88,7 @@ class File(QWidget):
         scaled_drag = cover_image.pixmap().scaled(self.drag_width_px, height/width * self.drag_width_px, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         bg = QPixmap(scaled_width, scaled_height)
         bg.fill(Qt.white)
+        
         painter = QPainter(bg)
         painter.drawPixmap(0, 0, scaled_drag)
         painter.end()
