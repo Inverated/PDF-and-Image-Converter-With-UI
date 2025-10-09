@@ -1,6 +1,7 @@
 from ui.display.preview_item import PreviewItem
 
-from fitz import open as open_pdf, Document, Matrix
+from fitz import open as open_doc, Document, Matrix
+
 
 class Downloader:
     #no need to add signal for download progress, very fast
@@ -17,7 +18,7 @@ class Downloader:
                 return (False, "File not found at {}".format(each.full_path))
             opened_files[each.full_path] = doc
 
-        self.output = open_pdf()
+        self.output = open_doc()
         for each in fileList:
             file = opened_files[each.full_path]
             range = each.document_page_range
@@ -40,7 +41,7 @@ class Downloader:
         
     def open_file(self, path):
         try:
-            return open_pdf(path) 
+            return open_doc(path) 
         except:
             return None
     

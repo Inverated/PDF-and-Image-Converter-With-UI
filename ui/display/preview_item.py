@@ -76,7 +76,7 @@ class PreviewItem(QWidget):
         self.page_label.setText("Pg. " + str(page_no))
     
     def download_clicked(self):
-        self.downloadRequested.emit([[self], "Pdf (*.pdf);; All Files (*)"])
+        self.downloadRequested.emit([self])
       
     def remove_clicked(self):
         return self.removeRequested.emit(self)

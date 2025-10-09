@@ -11,6 +11,11 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.prev_open_dir = None
         
+        formats = ('png', 'pnm', 'pgm', 'ppm', 'pbm', 'pam', 'psd', 'ps', 'jpg', 'jpeg')
+        ext = " ".join(f"*.{ext}" for ext in formats)
+        self.full_extension_filter = "Pdf (*.pdf);; Image ({})".format(ext)
+        
+        
         self.setWindowTitle("Test")
 
         layout = QHBoxLayout()
@@ -39,7 +44,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
     
     def download_individual(self, item):
-        self.download_file(item[0], item[1])
+        self.download_file(item,  self.full_extension_filter)
         return
     
     def download_clicked(self):
