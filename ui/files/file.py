@@ -65,6 +65,7 @@ class File(QWidget):
     def end_thread(self):
         self.running_thread.join()
         self.__set_drag_image()
+        self.setFileName()
     
     def update_progress(self, curr_page_no):
         self.curr_page_no = curr_page_no
@@ -79,7 +80,7 @@ class File(QWidget):
         self.renderComplete.emit()
 
     def __set_drag_image(self):
-        if len(self.image_list) == 0:
+        if self.image_list == None or len(self.image_list) == 0:
             return
         cover_image = self.image_list[0].image_label
         width = cover_image.width()
@@ -98,7 +99,7 @@ class File(QWidget):
         self.drag_image = bg
               
     def setFileName(self):      
-        if self.page_count == -1:
+        if self.page_count == -1 or self.drag_image == None:
             self.label.setText("{}{}\t{}{}".format(self.document_name, self.extension, "Loading...", self.curr_page_no)) 
             self.label.setStyleSheet("color: grey")    
         else:
@@ -169,6 +170,7 @@ class File(QWidget):
             
             if self.drag_image == None:
                 print("Image not rendered properly")
+                return
             
             drag.setPixmap(self.drag_image)
 

@@ -1,11 +1,14 @@
+from typing import override
+from backend.file_downloader import Downloader
 from ui.display.preview_item import PreviewItem
-from PySide6.QtWidgets import QLabel
+from PySide6.QtWidgets import QLabel, QFileDialog
 from ui.display.image import PixMap
 
 class PreviewImage(PreviewItem):
     def __init__(self, page_no:int, document_name:str, full_path:str, document_page_range:list = None, image:PixMap = None, curr_size:int = 100, contains:list = None):
         super().__init__(page_no, document_name, full_path, document_page_range, image, curr_size, contains)
     
+    @override
     def setImage(self):
         # Image (Change to preview at lower resolution from file list?)
         image_label = QLabel()
@@ -13,12 +16,14 @@ class PreviewImage(PreviewItem):
         image_label.setPixmap(scaled)
         image_label.setFixedSize(scaled.size())
         return image_label
-        
+    
+    @override
     def update_image_size(self, new_size): 
         self.curr_size = new_size
         scaled = self.image.scaled(new_size)
         self.image_label.setPixmap(scaled)
         self.image_label.setFixedSize(scaled.size())
         
+    @override
     def copyOf(self):
         return PreviewImage(self.page_no, self.document_name, self.full_path, self.document_page_range, self.image, self.curr_size)

@@ -1,12 +1,12 @@
 from ui.display.preview_item import PreviewItem
 
-from fitz import open as open_pdf, Document
+from fitz import open as open_pdf, Document, Matrix
 
 class Downloader:
-    #add signal for download progress
-    def downloadFile(self, fileList:list[PreviewItem], save_location:str):
-        #destroy when finish download
+    #no need to add signal for download progress, very fast
+    def downloadFile(self, fileList:list[PreviewItem], save_location):
         # returns (successful, message)
+        
         opened_files:dict[str, Document] = dict()
         
         for each in fileList:
@@ -14,7 +14,7 @@ class Downloader:
                 continue
             doc = self.open_file(each.full_path)
             if doc == None:
-                return (False, "File not found", each.full_path)
+                return (False, "File not found at {}".format(each.full_path))
             opened_files[each.full_path] = doc
 
         self.output = open_pdf()
@@ -24,12 +24,19 @@ class Downloader:
             self.output.insert_file(file, from_page=range[0] - 1, to_page=range[1] - 1)
         
         try:
-            self.output.save(save_location[0] + ".pdf")
-        except:
-            return (False, "Unable to save at location", save_location)   
+            if save_location[-3:] != "pdf":
+                page = self.output.load_page(0)
+                pix = page.get_pixmap(matrix=Matrix(2,2))
+                pix.save(save_location)
+            else:
+                self.output.save(save_location)
+            
+        except Exception as e:
+            print(e)
+            return (False, "Unable to save at {}".format(save_location))   
         finally:
             self.close_all_files(opened_files) 
-            return (True, "Successful", save_location)
+            return (True, "File saved at {}".format(save_location))
         
     def open_file(self, path):
         try:

@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QScrollArea, QSizePolicy
+from PySide6.QtCore import Signal, Qt
 from PySide6.QtGui import QDropEvent, QDragMoveEvent
 
 from ui.display.preview_item import PreviewItem
@@ -7,6 +8,8 @@ from ui.display.size_slider import SizeSliderLayout
 from ui.files.file import File
 
 class Preview(QWidget):
+    downloadItem = Signal(list)
+    
     def __init__(self):
         super().__init__()
         self.image_size = 100 #default 100
@@ -46,9 +49,13 @@ class Preview(QWidget):
     
     def implementWidgetConnection(self):
         for i in range(self.widget_stack.count()):
-            preview_item_wid:PreviewItem = self.widget_stack.itemAt(i).widget()
+            preview_item_wid:PreviewItem = self.widget_stack.itemAt(i).widget()            
             self.size_slider.connect(preview_item_wid.update_image_size)
-            preview_item_wid.removeRequested.connect(self.remove_page)
+            preview_item_wid.removeRequested.connect(self.remove_page, Qt.ConnectionType.UniqueConnection)               
+            preview_item_wid.downloadRequested.connect(self.download_item, Qt.ConnectionType.UniqueConnection)
+    
+    def download_item(self, item):
+        self.downloadItem.emit(item)
         
     def update_size(self, value):
         self.image_size = value
@@ -223,7 +230,7 @@ class Preview(QWidget):
     def get_simplified(self):
         if self.widget_stack.count() == 0:
             # add prompt user 
-            return
+            return []
         
         start:PreviewItem = self.widget_stack.itemAt(0).widget().copyOf()
         new_stack:list[PreviewItem] = []

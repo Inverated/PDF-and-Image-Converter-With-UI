@@ -5,6 +5,8 @@ from ui.display.image import PixMap
 
 class PreviewItem(QWidget):
     removeRequested = Signal(QWidget)
+    downloadRequested = Signal(list)
+    
     def __init__(self, page_no:int, document_name:str, full_path:str, document_page_range:list[int] = None, image:PixMap = None, curr_size:int = 100, contains:list = None):
         super().__init__()   
         self.drag_width_px = 200
@@ -41,17 +43,24 @@ class PreviewItem(QWidget):
         self.image_stack.addWidget(bottom_indicator)
 
         
-        button = QPushButton()
-        pixmap_icon = QStyle.StandardPixmap.SP_DialogDiscardButton
-        icon = self.style().standardIcon(pixmap_icon)
-        button.setIconSize(QSize(16, 16))
-        button.setIcon(icon)
-        button.clicked.connect(self.remove_clicked)
+        discard_button = QPushButton()
+        discard_icon = QStyle.StandardPixmap.SP_DialogDiscardButton
+        icon = self.style().standardIcon(discard_icon)
+        discard_button.setIconSize(QSize(16, 16))
+        discard_button.setIcon(icon)
+        discard_button.clicked.connect(self.remove_clicked)
 
+        save_button = QPushButton()
+        save_icon = QStyle.StandardPixmap.SP_DialogSaveButton
+        icon = self.style().standardIcon(save_icon)
+        save_button.setIconSize(QSize(16, 16))
+        save_button.setIcon(icon)
+        save_button.clicked.connect(self.download_clicked)
 
         layout.addWidget(self.page_label, stretch=0)
         layout.addLayout(self.image_stack, stretch=1)
-        layout.addWidget(button, stretch=0)
+        layout.addWidget(save_button, stretch=0)
+        layout.addWidget(discard_button, stretch=0)
                 
         self.setLayout(layout)
     
@@ -65,7 +74,10 @@ class PreviewItem(QWidget):
                   
     def update_page_no(self, page_no:int):
         self.page_label.setText("Pg. " + str(page_no))
-        
+    
+    def download_clicked(self):
+        self.downloadRequested.emit([[self], "Pdf (*.pdf);; All Files (*)"])
+      
     def remove_clicked(self):
         return self.removeRequested.emit(self)
     

@@ -17,12 +17,13 @@ class MainWindow(QMainWindow):
 
         splitter = QSplitter(Qt.Horizontal)
         self.preview_list_widget = Preview()
-        file_list_widget = SideList()
+        self.file_list_widget = SideList()
         
-        file_list_widget.downloadFile.connect(self.download_clicked)
+        self.preview_list_widget.downloadItem.connect(self.download_individual)
+        self.file_list_widget.downloadFile.connect(self.download_clicked)
         
         splitter.addWidget(self.preview_list_widget)
-        splitter.addWidget(file_list_widget)
+        splitter.addWidget(self.file_list_widget)
 
         splitter.setCollapsible(0, False)
         splitter.setCollapsible(1, False)
@@ -37,15 +38,37 @@ class MainWindow(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
     
+    def download_individual(self, item):
+        self.download_file(item[0], item[1])
+        return
+    
     def download_clicked(self):
-        dialog = QFileDialog()
-        selected_dir = dialog.getSaveFileName(None, "Open dir", self.prev_open_dir if self.prev_open_dir else None)
-        downloader = Downloader()
-        
+        self.file_list_widget.set_status_message("", "white")
         compacted_list = self.preview_list_widget.get_simplified()
         if len(compacted_list) == 0:
+            self.file_list_widget.set_status_message("No files selected", "red")
             return
         
-        downloader.downloadFile(compacted_list, selected_dir)
+        self.download_file(compacted_list, "Pdf (*.pdf)")
+        return
+
+    def download_file(self, lis, filter):
+        selected_dir = self.get_download_dir(filter)
+        if selected_dir == "":
+            #no error message, quit gracefully
+            return
+        
+        downloader = Downloader()
+        (status, message) = downloader.downloadFile(lis, selected_dir)
+        
+        self.file_list_widget.set_status_message(message, "green" if status else "red")
+
         del downloader
         return
+    
+    def get_download_dir(self, filter):
+        dialog = QFileDialog()
+        selected_dir = dialog.getSaveFileName(None, "Save file", self.prev_open_dir if self.prev_open_dir else None, filter=filter)
+        dialog.deleteLater()
+        return selected_dir[0]
+        

@@ -1,5 +1,5 @@
 import os
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QStyle, QFileDialog, QSizePolicy, QFrame
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QStyle, QFileDialog, QSizePolicy, QFrame, QLabel
 from PySide6.QtCore import QSize, Signal
 
 from ui.files.file import File
@@ -9,10 +9,9 @@ class SideList(QWidget):
     
     def __init__(self):
         super().__init__()     
-        self.prev_open_dir = ""     #re open open file from same dir
+        self.prev_open_dir = None    #re open open file from same dir
         self.setMinimumWidth(250)   #cannot shrink below
-
-        self.setAcceptDrops(True)          
+        self.setAcceptDrops(True)
         layout = QVBoxLayout()
 
         # Top row
@@ -44,8 +43,11 @@ class SideList(QWidget):
         
         # Bottom row
         button_row = QHBoxLayout()
+        self.status = QLabel()
+        self.status.setObjectName("status_label")
         save_button = QPushButton('Save as')
         save_button.clicked.connect(self.__click_save)
+        button_row.addWidget(self.status)
         button_row.addStretch()
         button_row.addWidget(save_button)     
         
@@ -54,6 +56,10 @@ class SideList(QWidget):
         layout.addLayout(button_row)
         
         self.setLayout(layout)
+       
+    def set_status_message(self, message, color):
+        self.status.setText(message)
+        self.status.setStyleSheet("color: {};".format(color))
         
     def add_files(self):
         dialog = QFileDialog()
