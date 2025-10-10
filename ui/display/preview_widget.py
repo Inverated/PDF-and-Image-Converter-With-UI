@@ -13,11 +13,14 @@ class Preview(QWidget):
     def __init__(self):
         super().__init__()
         self.image_size = 100 #default 100
+        self.time_counter = 0
+        
         self.setAcceptDrops(True)  
         layout = QVBoxLayout()
             
         items = QVBoxLayout()
         self.scroll_area = QScrollArea()
+        self.scroll_bar = self.scroll_area.verticalScrollBar()
         self.scroll_area.setWidgetResizable(True)
         
         container = QWidget()
@@ -28,6 +31,9 @@ class Preview(QWidget):
         self.scroll_area.setWidget(container)        
         items.addWidget(self.scroll_area)
 
+        self.maxHeight = self.scroll_bar.height()
+        self.scroll_threshold = [0.3 * self.maxHeight, 0.15 * self.maxHeight, 0.1 * self.maxHeight]
+        
         option_bar = QHBoxLayout()
         
         self.compact_checkbox = QCheckBox()
@@ -124,12 +130,36 @@ class Preview(QWidget):
     def dragEnterEvent(self, event):
         event.accept()
     
+    def __updateScrollHeight(self):
+        self.maxHeight = self.scroll_bar.height()
+        self.scroll_threshold = [0.3 * self.maxHeight, 0.15 * self.maxHeight, 0.1 * self.maxHeight]
+        
+    def __edgeScroll(self, cursorY:int):     
+        if cursorY < self.scroll_threshold[0]:
+            if cursorY < self.scroll_threshold[2]:
+                self.scroll_bar.setValue(self.scroll_bar.value() - 15)
+            if cursorY < self.scroll_threshold[1]:
+                self.scroll_bar.setValue(self.scroll_bar.value() - 10)
+            else:
+                self.scroll_bar.setValue(self.scroll_bar.value() - 50)
+                
+        elif cursorY > self.maxHeight - self.scroll_threshold[0]:
+            if cursorY > self.maxHeight - self.scroll_threshold[2]:
+                self.scroll_bar.setValue(self.scroll_bar.value() + 15)
+            elif cursorY > self.maxHeight - self.scroll_threshold[1]:
+                self.scroll_bar.setValue(self.scroll_bar.value() + 10)
+            else:
+                self.scroll_bar.setValue(self.scroll_bar.value() + 5)
+            
     def __findTargetLocation(self, event:QDropEvent | QDragMoveEvent):
         pos = event.position().toPoint()
         container_pos = self.widget_stack.parentWidget().mapFrom(self, pos)
         
-        print(container_pos, self.scroll_area.width(), self.scroll_area.height())   #autoscrolling
-        
+        if self.maxHeight != self.scroll_area.height():
+            self.__updateScrollHeight()
+            
+        self.__edgeScroll(pos.y())
+
         n = 0
         for n in range(self.widget_stack.count()):
             each:PreviewItem = self.widget_stack.itemAt(n).widget()
