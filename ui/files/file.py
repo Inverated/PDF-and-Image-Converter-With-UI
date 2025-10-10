@@ -25,6 +25,8 @@ class File(QWidget):
         
         self.page_count = -1 #initialise
         self.curr_page_no = 0
+        self.render_attempt = 0
+        
         self.image_list:list[PreviewItem] = []
         self.stop_event_thread = threading.Event()
         
@@ -66,6 +68,21 @@ class File(QWidget):
         self.running_thread.join()
         self.__set_drag_image()
         self.setFileName()
+        if self.drag_image == None:
+            if self.render_attempt == 3:
+                self.label.setText("Unable to render image, please upload again") 
+                self.label.setStyleSheet("color: red")  
+            else:
+                self.__re_render()
+                self.render_attempt += 1
+    
+    def __re_render(self):
+        self.page_count = -1
+        self.curr_page_no = 0
+        self.running_thread = threading.Thread(target=self.convert_to_list, daemon=True)
+        self.running_thread.start()
+        self.renderComplete.connect(self.end_thread)
+        self.renderProgress.connect(self.update_progress)
     
     def update_progress(self, curr_page_no):
         self.curr_page_no = curr_page_no
@@ -75,7 +92,6 @@ class File(QWidget):
         if self.extension == '.pdf':
             self.image_list = self.__convert_pdf_to_list()        
         else:
-            #assume everything else is image?
             self.image_list = self.__convert_image_to_list()
         self.renderComplete.emit()
 
@@ -110,7 +126,7 @@ class File(QWidget):
     def __convert_image_to_list(self) -> list[PreviewItem]:
         if self.stop_event_thread.is_set(): # need to add for image if not threading throw error after closing app (still does not work some times)
             return []
-        page_range = [1,1]
+        page_range = [1, 1]
         image = QImage(self.path_name)
         pixmap = PixMap(image, image.width(), image.height())
         

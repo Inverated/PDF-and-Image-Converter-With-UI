@@ -1,11 +1,12 @@
 import os
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QStyle, QFileDialog, QSizePolicy, QFrame, QLabel
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QStyle, QFileDialog, QSizePolicy, QFrame, QLabel, QCheckBox
 from PySide6.QtCore import QSize, Signal
 
 from ui.files.file import File
 
 class SideList(QWidget):
     downloadFile = Signal()
+    normaliseRequest = Signal(int)
     
     def __init__(self):
         super().__init__()     
@@ -41,6 +42,19 @@ class SideList(QWidget):
         container.setLayout(self.file_stack)
         selection_area.setWidget(container)
         
+        #option row
+        option_row = QHBoxLayout()
+        self.normWidth = QCheckBox()
+        self.normWidth.setText("Normalise Width")
+        self.normWidth.stateChanged.connect(self.normaliseWidth)
+        self.normHeight = QCheckBox()
+        self.normHeight.setText("Normalise Height")
+        self.normHeight.stateChanged.connect(self.normaliseHeight)
+        
+        option_row.addStretch()
+        option_row.addWidget(self.normWidth)
+        option_row.addWidget(self.normHeight)
+        
         # Bottom row
         button_row = QHBoxLayout()
         self.status = QLabel()
@@ -53,6 +67,7 @@ class SideList(QWidget):
         
         layout.addLayout(edit_row)
         layout.addWidget(selection_area, 2)
+        layout.addLayout(option_row)
         layout.addLayout(button_row)
         
         self.setLayout(layout)
@@ -76,6 +91,29 @@ class SideList(QWidget):
         event.accept()
         #do nothing, just hides error cursor
 
+    def normaliseWidth(self, state):
+        if state == 2:
+            if self.normHeight.isChecked():
+                self.normHeight.blockSignals(True)
+                self.normHeight.setChecked(False)
+                self.normHeight.blockSignals(False)
+            self.normaliseRequest.emit(1)
+            
+        elif state == 0:
+            self.normaliseRequest.emit(0)
+        return
+    
+    def normaliseHeight(self, state):
+        if state == 2:
+            if self.normWidth.isChecked():
+                self.normWidth.blockSignals(True)
+                self.normWidth.setChecked(False)
+                self.normWidth.blockSignals(False)
+            self.normaliseRequest.emit(2)
+        elif state == 0:
+            self.normaliseRequest.emit(0)
+        return
+    
     #open from test dir
     def __openTestFiles(self):
         files = []
