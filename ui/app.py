@@ -44,8 +44,8 @@ class MainWindow(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
     
-    def normaliseImages(self, state:1|2|3):
-        print(state)
+    def normaliseImages(self, state:0|1|2):
+        self.preview_list_widget.previewNormalised(state)
         return
     
     def download_individual(self, item):

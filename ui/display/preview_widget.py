@@ -14,6 +14,8 @@ class Preview(QWidget):
         super().__init__()
         self.image_size = 100 #default 100
         self.time_counter = 0
+        self.max_width = self.max_height  = -1
+        self.min_height = self.min_width = 99999 
         
         self.setAcceptDrops(True)  
         layout = QVBoxLayout()
@@ -53,6 +55,11 @@ class Preview(QWidget):
         layout.addLayout(option_bar)
         self.setLayout(layout)
     
+    def previewNormalised(self, state:0|1|2): #0 - reset; 1 - width; 2 - height
+        print(self.min_width, self.max_width)
+        print(self.min_height, self.max_height)
+        return
+    
     def implementWidgetConnection(self):
         for i in range(self.widget_stack.count()):
             preview_item_wid:PreviewItem = self.widget_stack.itemAt(i).widget()            
@@ -66,15 +73,56 @@ class Preview(QWidget):
     def update_size(self, value):
         self.image_size = value
        
-    def reset_page_no(self):
+    def __reset_page_no(self):
         for i in range(self.widget_stack.count()):
             temp:PreviewItem = self.widget_stack.itemAt(i).widget()
             temp.update_page_no(i + 1)
              
     def remove_page(self, page:PreviewItem):
         page.setParent(None)
+        self.__update_saved_size(page, is_new=False)
         page.deleteLater()
-        self.reset_page_no()
+        self.__reset_page_no()
+        
+    
+    def __find_val(self, find_min:bool = True, find_width:bool = True):
+        item:PreviewItem = self.widget_stack.itemAt(0).widget()
+        val = item.getImage().getWidth() if find_width else item.getImage().getHeight()
+        for i in range(1, self.widget_stack.count()):
+            item:PreviewItem = self.widget_stack.itemAt(i).widget()
+            if find_min:
+                val = item.image.getWidth() if find_width and item.image.getWidth() < val else val
+                val = item.image.getHeight() if not find_width and item.image.getHeight() < val else val
+            else:
+                val = item.image.getWidth() if find_width and item.image.getWidth() > val else val
+                val = item.image.getHeight() if not find_width and item.image.getHeight() > val else val
+        return val       
+            
+    def __update_saved_size(self, page:PreviewItem, is_new = True): #change to a better data structure later
+        new_width =  page.image.getWidth()
+        new_height = page.image.getHeight()
+        if not is_new:
+            if self.widget_stack.count() == 0:
+                self.max_width = self.max_height  = -1
+                self.min_height = self.min_width = 99999 
+                return
+            if new_width == self.min_width:
+                self.min_width = self.__find_val(True, True)
+            if new_width == self.max_width:
+                self.max_width = self.__find_val(False, True)
+            if new_height == self.min_height:
+                self.min_height = self.__find_val(True, False)
+            if new_height == self.max_height:
+                self.max_height = self.__find_val(False, False)
+        else:
+            if new_width > self.max_width:
+                self.max_width = new_width
+            if new_width < self.min_width:
+                self.min_width = new_width
+            if new_height > self.max_height:
+                self.max_height = new_height
+            if new_height < self.min_height:
+                self.min_height = new_height
             
     def set_compact_view(self, compact):
         if self.widget_stack.count() == 0:
@@ -99,7 +147,7 @@ class Preview(QWidget):
             for each in new_stack:
                 self.widget_stack.addWidget(each)
                 
-            self.reset_page_no()
+            self.__reset_page_no()
             self.implementWidgetConnection()
         
         elif compact == 0:
@@ -116,7 +164,7 @@ class Preview(QWidget):
             for each in new_stack:
                 self.widget_stack.addWidget(each)           
             
-            self.reset_page_no()
+            self.__reset_page_no()
             self.implementWidgetConnection()
             return
                 
@@ -177,10 +225,10 @@ class Preview(QWidget):
             self.__addFromFileList(event)
         elif isinstance(widget, PreviewItem):
             self.__reorderInternalItems(event)
-        
+            
         event.accept()
         self.resetIndicators()
-        self.reset_page_no()
+        self.__reset_page_no()
     
     def __addFromFileList(self, event:QDropEvent):
         widget:File = event.source()
@@ -190,17 +238,21 @@ class Preview(QWidget):
             n = 0
         
         if self.compact_checkbox.isChecked():
+            for item in widget.image_list:
+                self.__update_saved_size(item, is_new=True)
             first:PreviewItem = widget.image_list[0].copyOf()
             first.compact_list(widget.image_list[1:])
             first.update_image_size(self.image_size)
             self.widget_stack.insertWidget(n, first)
         else:
             for i, item in enumerate(widget.image_list):
+                self.__update_saved_size(item, is_new=True)
                 item_copy:PreviewItem = item.copyOf()
                 item_copy.update_image_size(self.image_size)
                 self.widget_stack.insertWidget(n + i, item_copy)
                 
         self.implementWidgetConnection()
+        return
 
 
     def __reorderInternalItems(self, event:QDropEvent):

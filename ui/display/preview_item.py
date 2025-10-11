@@ -64,6 +64,9 @@ class PreviewItem(QWidget):
                 
         self.setLayout(layout)
     
+    def getImage(self):
+        return self.image
+    
     def setImage(self):
         #Overide
         return None
@@ -136,6 +139,6 @@ class PreviewItem(QWidget):
         qline = self.image_stack.itemAt(self.image_stack.count() - 1).widget()
         qline.show() if show else qline.hide()
         
-    def copyOf(self):
+    def copyOf(self) -> 'PreviewItem':
         return None
 

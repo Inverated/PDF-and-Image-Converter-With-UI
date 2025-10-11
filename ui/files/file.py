@@ -2,6 +2,8 @@ import threading
 
 from os.path import splitext
 
+from time import sleep as i_want_to_sleep
+
 from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout, QStyle, QPushButton
 from PySide6.QtGui import QImage, QDrag, QPainter, QPixmap
 from PySide6.QtCore import QSize, Qt, QMimeData, Signal
@@ -73,6 +75,7 @@ class File(QWidget):
                 self.label.setText("Unable to render image, please upload again") 
                 self.label.setStyleSheet("color: red")  
             else:
+                print("Fail " + self.render_attempt)
                 self.__re_render()
                 self.render_attempt += 1
     
@@ -95,13 +98,12 @@ class File(QWidget):
             self.image_list = self.__convert_image_to_list()
         self.renderComplete.emit()
 
-    def __set_drag_image(self):
+    def __set_drag_image(self) -> bool:
         if self.image_list == None or len(self.image_list) == 0:
             return
         cover_image = self.image_list[0].image_label
         width = cover_image.width()
         height = cover_image.height()
-        
         scaled_width = self.drag_width_px
         scaled_height = height/width * self.drag_width_px
         scaled_drag = cover_image.pixmap().scaled(self.drag_width_px, height/width * self.drag_width_px, Qt.KeepAspectRatio, Qt.SmoothTransformation)
@@ -126,8 +128,10 @@ class File(QWidget):
     def __convert_image_to_list(self) -> list[PreviewItem]:
         if self.stop_event_thread.is_set(): # need to add for image if not threading throw error after closing app (still does not work some times)
             return []
+
         page_range = [1, 1]
         image = QImage(self.path_name)
+        i_want_to_sleep(0.01)
         pixmap = PixMap(image, image.width(), image.height())
         
         self.page_count = 1
@@ -186,6 +190,7 @@ class File(QWidget):
             
             if self.drag_image == None:
                 print("Image not rendered properly")
+                self.end_thread()
                 return
             
             drag.setPixmap(self.drag_image)

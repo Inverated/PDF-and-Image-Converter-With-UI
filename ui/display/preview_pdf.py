@@ -46,7 +46,7 @@ class PreviewPdf(PreviewItem):
         self.image_label.setFixedSize(scaled.size())
         
     @override
-    def copyOf(self):
+    def copyOf(self) -> 'PreviewPdf':
         return PreviewPdf(self.page_no, self.document_name, self.full_path, self.document_page_range, self.image, self.curr_size)
     
     @override

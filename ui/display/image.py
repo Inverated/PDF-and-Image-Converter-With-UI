@@ -8,7 +8,13 @@ class PixMap():
         self.height = height
         self.normWidth = width
         self.normHeight = height
-        
+    
+    def getWidth(self):
+        return self.width
+    
+    def getHeight(self):
+        return self.height
+    
     def normaliseWidth(self, maxWidth):
         self.normWidth = maxWidth
         self.normHeight = self.height / self.width * maxWidth
