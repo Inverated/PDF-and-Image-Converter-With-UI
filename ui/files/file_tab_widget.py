@@ -1,5 +1,5 @@
 import os
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QStyle, QFileDialog, QSizePolicy, QFrame, QLabel, QCheckBox
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QStyle, QFileDialog, QSizePolicy, QFrame, QLabel, QCheckBox, QRadioButton
 from PySide6.QtCore import QSize, Signal
 
 from ui.files.file import File
@@ -7,6 +7,7 @@ from ui.files.file import File
 class SideList(QWidget):
     downloadFile = Signal()
     normaliseRequest = Signal(int)
+    normaliseChoice = Signal(bool)
     
     def __init__(self):
         super().__init__()     
@@ -55,6 +56,23 @@ class SideList(QWidget):
         option_row.addWidget(self.normWidth)
         option_row.addWidget(self.normHeight)
         
+        #option row 2
+        option_row2 = QHBoxLayout()
+        
+        self.isMax = QRadioButton("Max")
+        self.isMax.setText("Max")
+        self.isMax.toggled.connect(self.normaliseTo)
+        
+        self.isMin = QRadioButton("Min")
+        self.isMin.setText("Min")
+        self.isMin.toggled.connect(self.normaliseTo)
+        self.isMin.setChecked(True)
+
+        
+        option_row2.addStretch()
+        option_row2.addWidget(self.isMin)
+        option_row2.addWidget(self.isMax)
+        
         # Bottom row
         button_row = QHBoxLayout()
         self.status = QLabel()
@@ -68,6 +86,7 @@ class SideList(QWidget):
         layout.addLayout(edit_row)
         layout.addWidget(selection_area, 2)
         layout.addLayout(option_row)
+        layout.addLayout(option_row2)
         layout.addLayout(button_row)
         
         self.setLayout(layout)
@@ -90,7 +109,16 @@ class SideList(QWidget):
     def dragEnterEvent(self, event):
         event.accept()
         #do nothing, just hides error cursor
-
+    
+    def normaliseTo(self):
+        if self.isMin.isChecked():
+            self.normaliseChoice.emit(True)
+        elif self.isMax.isChecked():
+            self.normaliseChoice.emit(False)
+         
+    def normaliseMax(self, state):
+        return
+        
     def normaliseWidth(self, state):
         if state == 2:
             if self.normHeight.isChecked():

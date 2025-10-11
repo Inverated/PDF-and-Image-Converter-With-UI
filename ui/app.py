@@ -27,6 +27,7 @@ class MainWindow(QMainWindow):
         self.preview_list_widget.downloadItem.connect(self.download_individual)
         self.file_list_widget.downloadFile.connect(self.download_clicked)
         self.file_list_widget.normaliseRequest.connect(self.normaliseImages)
+        self.file_list_widget.normaliseChoice.connect(self.setNormaliseChoice)
         
         splitter.addWidget(self.preview_list_widget)
         splitter.addWidget(self.file_list_widget)
@@ -43,6 +44,10 @@ class MainWindow(QMainWindow):
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
+    
+    def setNormaliseChoice(self, choice):
+        self.preview_list_widget.setNormaliseChoice(choice)
+        return
     
     def normaliseImages(self, state:0|1|2):
         self.preview_list_widget.previewNormalised(state)

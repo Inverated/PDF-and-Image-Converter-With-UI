@@ -18,6 +18,7 @@ class Preview(QWidget):
         self.max_width = self.max_height  = -1
         self.min_height = self.min_width = 99999 
         self.normalisedState = 0
+        self.normalisedWidth = True
         
         self.setAcceptDrops(True)  
         layout = QVBoxLayout()
@@ -57,14 +58,19 @@ class Preview(QWidget):
         layout.addLayout(option_bar)
         self.setLayout(layout)
     
+    def setNormaliseChoice(self, choice:bool):
+        if self.normalisedWidth != choice:
+            self.normalisedWidth = choice
+            self.previewNormalised(self.normalisedState) if self.normalisedState != 0 else None
+    
     def __normaliseImage(self, preview_item_wid:PreviewItem):
         preview_item_image:PixMap = preview_item_wid.getImage()
         preview_item_image.resetNorm()
         match (self.normalisedState):
             case 1:
-                preview_item_image.normaliseWidth(self.min_width)
+                preview_item_image.normaliseWidth(self.min_width if self.normalisedWidth else self.min_height)
             case 2:
-                preview_item_image.normaliseHeight(self.min_height)
+                preview_item_image.normaliseHeight(self.min_height if self.normalisedWidth else self.max_height)
         preview_item_wid.update_image_size(self.image_size)
         
     def previewNormalised(self, state:0|1|2): #0 - reset; 1 - width; 2 - height
@@ -85,6 +91,7 @@ class Preview(QWidget):
         self.downloadItem.emit(item)
         
     def update_size(self, value):
+        value = round(value / 10) * 10
         self.image_size = value
        
     def __reset_page_no(self):
