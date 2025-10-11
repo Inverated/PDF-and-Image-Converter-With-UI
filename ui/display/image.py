@@ -15,6 +15,12 @@ class PixMap():
     def getHeight(self):
         return self.height
     
+    def getScale(self): 
+        print(self.width, self.height)
+        print(self.normWidth, self.normHeight)
+        #calculate here, dont need calculate for every image created. only needed at download
+        return self.normWidth / self.width
+    
     def normaliseWidth(self, newWidth):
         self.normWidth = newWidth
         self.normHeight = self.height / self.width * newWidth

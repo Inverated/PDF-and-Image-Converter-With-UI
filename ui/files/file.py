@@ -37,6 +37,7 @@ class File(QWidget):
         
         self.path_name = path_name
         basename, self.extension = splitext(path_name)
+        self.extension = self.extension.lower()
         self.document_name = basename.split('/')[-1]
         
         # Label tab with name (Create the label before thread as file name will be updated)
@@ -136,7 +137,7 @@ class File(QWidget):
         
         self.page_count = 1
         self.setFileName()
-        return [PreviewImage(page_no=1, document_name=self.document_name, full_path=self.path_name,
+        return [PreviewImage(page_no=1, document_name=self.document_name, full_path=self.path_name, extension=self.extension,
                             document_page_range=page_range, curr_size=self.initial_page_size,
                             image=pixmap)]
          
@@ -166,7 +167,7 @@ class File(QWidget):
 
             pixmap = PixMap(rendered_page, ori_width, ori_height)   #scale back to original size with same resolution
             
-            image_list.append(PreviewPdf(page_no=curr_page, document_name=self.document_name, full_path=self.path_name,
+            image_list.append(PreviewPdf(page_no=curr_page, document_name=self.document_name, full_path=self.path_name, extension=self.extension,
                                           document_page_range=page_range, curr_size=self.initial_page_size,
                                           image=pixmap))
             try:

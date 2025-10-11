@@ -74,7 +74,7 @@ class MainWindow(QMainWindow):
             return
         
         downloader = Downloader()
-        (status, message) = downloader.downloadFile(lis, selected_dir)
+        (status, message) = downloader.downloadFile(lis, selected_dir, self.preview_list_widget.isNormalised())
         
         self.file_list_widget.set_status_message(message, "green" if status else "red")
 

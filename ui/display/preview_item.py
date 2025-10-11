@@ -7,7 +7,7 @@ class PreviewItem(QWidget):
     removeRequested = Signal(QWidget)
     downloadRequested = Signal(list)
     
-    def __init__(self, page_no:int, document_name:str, full_path:str, document_page_range:list[int] = None, image:PixMap = None, curr_size:int = 100, contains:list = None):
+    def __init__(self, page_no:int, document_name:str, full_path:str, extension:str, document_page_range:list[int] = None, image:PixMap = None, curr_size:int = 100, contains:list = None):
         super().__init__()   
         self.drag_width_px = 200
         layout = QHBoxLayout()
@@ -18,6 +18,7 @@ class PreviewItem(QWidget):
         self.full_path = full_path
         self.image = image
         self.contains = contains
+        self.extension = extension
 
         self.page_label = QLabel("Pg. " + str(page_no))
         

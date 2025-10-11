@@ -7,8 +7,8 @@ from PySide6.QtCore import Qt, QMimeData
 from ui.display.image import PixMap
 
 class PreviewPdf(PreviewItem):
-    def __init__(self, page_no:int, document_name:str, full_path:str, document_page_range:list = None, image:PixMap = None, curr_size:int = 100, contains:list = None):
-        super().__init__(page_no, document_name, full_path, document_page_range, image, curr_size, contains)
+    def __init__(self, page_no:int, document_name:str, full_path:str, extension:str, document_page_range:list = None, image:PixMap = None, curr_size:int = 100, contains:list = None):
+        super().__init__(page_no, document_name, full_path, extension, document_page_range, image, curr_size, contains)
         #add white background
         self.image_label.setStyleSheet("background-color: white")
         
@@ -49,7 +49,7 @@ class PreviewPdf(PreviewItem):
         
     @override
     def copyOf(self) -> 'PreviewPdf':
-        return PreviewPdf(self.page_no, self.document_name, self.full_path, self.document_page_range, self.image, self.curr_size)
+        return PreviewPdf(self.page_no, self.document_name, self.full_path, self.extension, self.document_page_range, self.image, self.curr_size)
     
     @override
     def mouseMoveEvent(self, event):

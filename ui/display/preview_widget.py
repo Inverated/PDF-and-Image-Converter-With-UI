@@ -58,6 +58,9 @@ class Preview(QWidget):
         layout.addLayout(option_bar)
         self.setLayout(layout)
     
+    def isNormalised(self):
+        return self.normalisedState != 0
+    
     def setNormaliseChoice(self, choice:bool):
         if self.normalisedWidth != choice:
             self.normalisedWidth = choice
@@ -85,7 +88,7 @@ class Preview(QWidget):
             self.size_slider.connect(preview_item_wid.update_image_size)
             preview_item_wid.removeRequested.connect(self.remove_page, Qt.ConnectionType.UniqueConnection)               
             preview_item_wid.downloadRequested.connect(self.download_item, Qt.ConnectionType.UniqueConnection)
-            
+            preview_item_wid.update_image_size(self.image_size)
     
     def download_item(self, item):
         self.downloadItem.emit(item)
@@ -339,10 +342,10 @@ class Preview(QWidget):
             # add prompt user 
             return []
         
-        start:PreviewItem = self.widget_stack.itemAt(0).widget().copyOf()
+        #start:PreviewItem = self.widget_stack.itemAt(0).widget().copyOf()
         new_stack:list[PreviewItem] = []
         
-        for i in range(1, self.widget_stack.count()):
+        """ for i in range(1, self.widget_stack.count()):
             curr_item:PreviewItem = self.widget_stack.itemAt(i).widget()
             if curr_item.document_name == start.document_name and curr_item.document_page_range[0] == start.document_page_range[1] + 1:
                 start = start.compact(curr_item)
@@ -350,7 +353,10 @@ class Preview(QWidget):
                 new_stack.append(start)
                 start = curr_item.copyOf()
         if start not in new_stack:
-            new_stack.append(start)
+            new_stack.append(start) """
+            
+        for i in range(0, self.widget_stack.count()):
+            new_stack.append(self.widget_stack.itemAt(i).widget())
         
         return new_stack
         
