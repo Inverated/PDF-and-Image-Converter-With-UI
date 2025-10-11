@@ -6,9 +6,9 @@ class SizeSliderLayout(QHBoxLayout):
         super().__init__()
         self.slider = QSlider(Qt.Orientation.Horizontal)
         self.slider.setMinimum(20)
-        self.slider.setMaximum(400)
+        self.slider.setMaximum(300)
         self.slider.setValue(image_size)
-        self.slider.setSingleStep(5)
+        self.slider.setSingleStep(10)
         self.slider.setFixedWidth(250)
         
         self.label = QLabel(str(image_size) + '%')
@@ -17,6 +17,11 @@ class SizeSliderLayout(QHBoxLayout):
         self.addWidget(self.slider)
         
     def update_label(self, value):
+        step = self.slider.singleStep()
+        if value % step != 0:
+            self.slider.setValue(round(value/step) * step)
+            return
+
         self.label.setText(str(value) + '%')
         
     def connect(self, method):

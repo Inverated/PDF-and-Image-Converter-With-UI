@@ -2,6 +2,7 @@ from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QScr
 from PySide6.QtCore import Signal, Qt
 from PySide6.QtGui import QDropEvent, QDragMoveEvent
 
+from ui.display.image import PixMap
 from ui.display.preview_item import PreviewItem
 from ui.display.size_slider import SizeSliderLayout
 
@@ -16,6 +17,7 @@ class Preview(QWidget):
         self.time_counter = 0
         self.max_width = self.max_height  = -1
         self.min_height = self.min_width = 99999 
+        self.normalisedState = 0
         
         self.setAcceptDrops(True)  
         layout = QVBoxLayout()
@@ -55,10 +57,21 @@ class Preview(QWidget):
         layout.addLayout(option_bar)
         self.setLayout(layout)
     
+    def __normaliseImage(self, preview_item_wid:PreviewItem):
+        preview_item_image:PixMap = preview_item_wid.getImage()
+        preview_item_image.resetNorm()
+        match (self.normalisedState):
+            case 1:
+                preview_item_image.normaliseWidth(self.min_width)
+            case 2:
+                preview_item_image.normaliseHeight(self.min_height)
+        preview_item_wid.update_image_size(self.image_size)
+        
     def previewNormalised(self, state:0|1|2): #0 - reset; 1 - width; 2 - height
-        print(self.min_width, self.max_width)
-        print(self.min_height, self.max_height)
-        return
+        self.normalisedState = state
+        for i in range(self.widget_stack.count()):
+            preview_item_wid:PreviewItem = self.widget_stack.itemAt(i).widget()
+            self.__normaliseImage(preview_item_wid)
     
     def implementWidgetConnection(self):
         for i in range(self.widget_stack.count()):
@@ -66,6 +79,7 @@ class Preview(QWidget):
             self.size_slider.connect(preview_item_wid.update_image_size)
             preview_item_wid.removeRequested.connect(self.remove_page, Qt.ConnectionType.UniqueConnection)               
             preview_item_wid.downloadRequested.connect(self.download_item, Qt.ConnectionType.UniqueConnection)
+            
     
     def download_item(self, item):
         self.downloadItem.emit(item)
@@ -162,7 +176,8 @@ class Preview(QWidget):
                 item.setParent(None)
                     
             for each in new_stack:
-                self.widget_stack.addWidget(each)           
+                self.widget_stack.addWidget(each)
+                self.__normaliseImage(each)       
             
             self.__reset_page_no()
             self.implementWidgetConnection()
@@ -244,16 +259,17 @@ class Preview(QWidget):
             first.compact_list(widget.image_list[1:])
             first.update_image_size(self.image_size)
             self.widget_stack.insertWidget(n, first)
+            self.__normaliseImage(first)
         else:
             for i, item in enumerate(widget.image_list):
                 self.__update_saved_size(item, is_new=True)
                 item_copy:PreviewItem = item.copyOf()
                 item_copy.update_image_size(self.image_size)
                 self.widget_stack.insertWidget(n + i, item_copy)
+                self.__normaliseImage(item)
                 
         self.implementWidgetConnection()
         return
-
 
     def __reorderInternalItems(self, event:QDropEvent):
         if self.widget_stack.count() <= 1:

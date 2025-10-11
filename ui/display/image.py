@@ -15,13 +15,13 @@ class PixMap():
     def getHeight(self):
         return self.height
     
-    def normaliseWidth(self, maxWidth):
-        self.normWidth = maxWidth
-        self.normHeight = self.height / self.width * maxWidth
+    def normaliseWidth(self, newWidth):
+        self.normWidth = newWidth
+        self.normHeight = self.height / self.width * newWidth
         
-    def normaliseHeight(self, maxHeight):
-        self.normHeight = maxHeight
-        self.normWidth = self.width / self.height * maxHeight
+    def normaliseHeight(self, newHeight):
+        self.normHeight = newHeight
+        self.normWidth = self.width / self.height * newHeight
         
     def resetNorm(self):
         self.normWidth = self.width

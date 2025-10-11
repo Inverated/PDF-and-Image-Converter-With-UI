@@ -40,6 +40,8 @@ class PreviewPdf(PreviewItem):
        
     @override 
     def update_image_size(self, new_size): 
+        if new_size % 10 != 0:
+            return
         self.curr_size = new_size
         scaled = self.image.scaled(new_size)
         self.image_label.setPixmap(scaled)
