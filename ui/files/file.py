@@ -21,7 +21,7 @@ class File(QWidget):
     removeRequested = Signal(QWidget)
     def __init__(self, path_name:str):
         super().__init__()
-        self.renderImage = False
+        self.renderImage = True
         self.drag_width_px = 200
         self.initial_page_size = 100
         self.drag_image = None
@@ -43,6 +43,7 @@ class File(QWidget):
         
         # Label tab with name (Create the label before thread as file name will be updated)
         self.label = QLabel()
+        self.label2 = QLabel()
         self.setFileName()
         
         #Load pdf image seperately
@@ -63,8 +64,8 @@ class File(QWidget):
         remove_button.clicked.connect(self.__deleteFile)
         
         layout.addWidget(self.label)
-        
         layout.addStretch()
+        layout.addWidget(self.label2)
         layout.addWidget(remove_button)
         self.setLayout(layout)
     
@@ -79,8 +80,8 @@ class File(QWidget):
         self.setFileName()
         if self.renderImage and self.drag_image == None:
             if self.render_attempt == 3:
-                self.label.setText("Unable to render image, please upload again") 
-                self.label.setStyleSheet("color: red")  
+                self.label2.setText("Unable to render image, please upload again") 
+                self.label2.setStyleSheet("color: red")  
             else:
                 print("Fail " + str(self.render_attempt))
                 self.__re_render()
@@ -130,11 +131,15 @@ class File(QWidget):
               
     def setFileName(self):      
         if self.page_count == -1 or (self.renderImage and self.drag_image == None):
-            self.label.setText("{}{}\t{}{}".format(self.document_name, self.extension, "Loading...", self.curr_page_no)) 
-            self.label.setStyleSheet("color: grey")    
+            self.label.setText("{}{}".format(self.document_name, self.extension)) 
+            self.label.setStyleSheet("color: grey")
+            self.label2.setText("{}{}".format("Loading...", self.curr_page_no)) 
+            self.label2.setStyleSheet("color: grey")    
         else:
-            self.label.setText("{}{:<30}\t{:>} page(s)".format(self.document_name, self.extension, self.page_count))
-            self.label.setStyleSheet("color: white")    
+            self.label.setText("{}{}".format(self.document_name, self.extension))
+            self.label.setStyleSheet("color: white")  
+            self.label2.setText("{}\t{:>5} page(s)".format("" if self.renderImage else "Preview disabled", self.page_count))
+            self.label2.setStyleSheet("color: white")    
 
     
     def __convert_image_to_list(self) -> list[PreviewItem]:
@@ -203,7 +208,7 @@ class File(QWidget):
                 return
             drag = QDrag(self)
             mime = QMimeData()
-            mime.setText(self.label.text())
+            mime.setText(self.label.text() + self.label2.text())
             drag.setMimeData(mime)
             
             if self.renderImage and self.drag_image == None:
