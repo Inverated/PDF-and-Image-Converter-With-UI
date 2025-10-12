@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt
 from backend.file_downloader import Downloader
 from ui.display.preview_widget import Preview
 from ui.files.file_tab_widget import SideList
+from ui.option_bar import OptionBar
 
 
 class MainWindow(QMainWindow):
@@ -17,7 +18,11 @@ class MainWindow(QMainWindow):
         
         
         self.setWindowTitle("Test")
-
+        
+        toolba = OptionBar()
+        toolba.previewRequested.connect(self.set_preview_state)
+        toolba.darkThemeRequested.connect(self.set_theme)
+        self.addToolBar(toolba)
         layout = QHBoxLayout()
 
         splitter = QSplitter(Qt.Horizontal)
@@ -37,13 +42,20 @@ class MainWindow(QMainWindow):
         # create custom qsplitterhandle with indicating lines?
         #splitter.setHandleWidth(10)
 
-
         #splitter.setSizes([500, 200])
         layout.addWidget(splitter)
 
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
+        
+        self.setContextMenuPolicy(Qt.NoContextMenu)
+    
+    def set_preview_state(enable:bool):
+        return
+    
+    def set_theme(dark:bool):
+        return
     
     def setNormaliseChoice(self, choice):
         self.preview_list_widget.setNormaliseChoice(choice)
