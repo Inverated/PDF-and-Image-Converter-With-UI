@@ -133,7 +133,7 @@ class File(QWidget):
             self.label.setText("{}{}\t{}{}".format(self.document_name, self.extension, "Loading...", self.curr_page_no)) 
             self.label.setStyleSheet("color: grey")    
         else:
-            self.label.setText("{}{}\t{} page(s)".format(self.document_name, self.extension, self.page_count))
+            self.label.setText("{}{:<30}\t{:>} page(s)".format(self.document_name, self.extension, self.page_count))
             self.label.setStyleSheet("color: white")    
 
     

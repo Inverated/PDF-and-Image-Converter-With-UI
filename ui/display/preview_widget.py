@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QScrollArea, QSizePolicy
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QScrollArea, QSizePolicy, QPushButton
 from PySide6.QtCore import Signal, Qt
 from PySide6.QtGui import QDropEvent, QDragMoveEvent
 
@@ -22,7 +22,13 @@ class Preview(QWidget):
         
         self.setAcceptDrops(True)  
         layout = QVBoxLayout()
-            
+        
+        option_bar2 = QHBoxLayout()
+        delAll = QPushButton("Delete All")
+        option_bar2.addStretch()
+        option_bar2.addWidget(delAll)
+        delAll.clicked.connect(self.__clearAllWidget)
+        
         items = QVBoxLayout()
         self.scroll_area = QScrollArea()
         self.scroll_bar = self.scroll_area.verticalScrollBar()
@@ -54,9 +60,17 @@ class Preview(QWidget):
         option_bar.addStretch()
         option_bar.addLayout(self.size_slider)
         
+        layout.addLayout(option_bar2)
         layout.addLayout(items)
         layout.addLayout(option_bar)
         self.setLayout(layout)
+    
+    def __clearAllWidget(self):
+        self.max_width = self.max_height  = -1
+        self.min_height = self.min_width = 99999 
+        while self.widget_stack.count():
+            self.widget_stack.takeAt(0).widget().deleteLater()
+        return
     
     def isNormalised(self):
         return self.normalisedState != 0
