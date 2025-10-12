@@ -21,6 +21,7 @@ class File(QWidget):
     removeRequested = Signal(QWidget)
     def __init__(self, path_name:str):
         super().__init__()
+        self.renderImage = False
         self.drag_width_px = 200
         self.initial_page_size = 100
         self.drag_image = None
@@ -67,16 +68,21 @@ class File(QWidget):
         layout.addWidget(remove_button)
         self.setLayout(layout)
     
+    def setRender(self, render:bool):
+        self.renderImage = render
+        if self.drag_image == None:
+            self.__re_render()
+            
     def end_thread(self):
         self.running_thread.join()
         self.__set_drag_image()
         self.setFileName()
-        if self.drag_image == None:
+        if self.renderImage and self.drag_image == None:
             if self.render_attempt == 3:
                 self.label.setText("Unable to render image, please upload again") 
                 self.label.setStyleSheet("color: red")  
             else:
-                print("Fail " + self.render_attempt)
+                print("Fail " + str(self.render_attempt))
                 self.__re_render()
                 self.render_attempt += 1
     
@@ -102,23 +108,28 @@ class File(QWidget):
     def __set_drag_image(self) -> bool:
         if self.image_list == None or len(self.image_list) == 0:
             return
+
         cover_image = self.image_list[0].image_label
-        width = cover_image.width()
-        height = cover_image.height()
-        scaled_width = self.drag_width_px
-        scaled_height = height/width * self.drag_width_px
-        scaled_drag = cover_image.pixmap().scaled(self.drag_width_px, height/width * self.drag_width_px, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        bg = QPixmap(scaled_width, scaled_height)
-        bg.fill(Qt.white)
+        qpixmap = cover_image.pixmap()
         
-        painter = QPainter(bg)
-        painter.drawPixmap(0, 0, scaled_drag)
-        painter.end()
+        if not qpixmap.isNull():
+            width = cover_image.width()
+            height = cover_image.height()
+            scaled_width = self.drag_width_px
+            scaled_height = height/width * self.drag_width_px
         
-        self.drag_image = bg
+            scaled_drag = qpixmap.scaled(self.drag_width_px, height/width * self.drag_width_px, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            bg = QPixmap(scaled_width, scaled_height)
+            bg.fill(Qt.white)
+            
+            painter = QPainter(bg)
+            painter.drawPixmap(0, 0, scaled_drag)
+            painter.end()
+            
+            self.drag_image = bg
               
     def setFileName(self):      
-        if self.page_count == -1 or self.drag_image == None:
+        if self.page_count == -1 or (self.renderImage and self.drag_image == None):
             self.label.setText("{}{}\t{}{}".format(self.document_name, self.extension, "Loading...", self.curr_page_no)) 
             self.label.setStyleSheet("color: grey")    
         else:
@@ -133,8 +144,10 @@ class File(QWidget):
         page_range = [1, 1]
         image = QImage(self.path_name)
         i_want_to_sleep(0.01)
-        pixmap = PixMap(image, image.width(), image.height())
-        
+        if self.renderImage:
+            pixmap = PixMap(image, image.width(), image.height())
+        else:
+            pixmap = PixMap(None, 0, 0)    
         self.page_count = 1
         self.setFileName()
         return [PreviewImage(page_no=1, document_name=self.document_name, full_path=self.path_name, extension=self.extension,
@@ -165,8 +178,11 @@ class File(QWidget):
 
             rendered_page = doc.render(page_no, QSize(width, height), options)
 
-            pixmap = PixMap(rendered_page, ori_width, ori_height)   #scale back to original size with same resolution
-            
+            if self.renderImage:
+                pixmap = PixMap(rendered_page, ori_width, ori_height)   #scale back to original size with same resolution
+            else:
+                pixmap = PixMap(None, 0, 0)
+                
             image_list.append(PreviewPdf(page_no=curr_page, document_name=self.document_name, full_path=self.path_name, extension=self.extension,
                                           document_page_range=page_range, curr_size=self.initial_page_size,
                                           image=pixmap))
@@ -176,6 +192,7 @@ class File(QWidget):
                 print("App forcefully quit")
                 return #app quit
             
+        doc.deleteLater()
         self.page_count = doc_length
         self.setFileName()
         return image_list
@@ -189,12 +206,13 @@ class File(QWidget):
             mime.setText(self.label.text())
             drag.setMimeData(mime)
             
-            if self.drag_image == None:
+            if self.renderImage and self.drag_image == None:
                 print("Image not rendered properly")
                 self.end_thread()
                 return
-            
-            drag.setPixmap(self.drag_image)
+                
+            if self.renderImage:
+                drag.setPixmap(self.drag_image)
 
             drag.exec(Qt.DropAction.MoveAction)
 

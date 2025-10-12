@@ -13,8 +13,9 @@ class PreviewImage(PreviewItem):
         # Image (Change to preview at lower resolution from file list?)
         image_label = QLabel()
         scaled = self.image.scaled(self.curr_size)
-        image_label.setPixmap(scaled)
-        image_label.setFixedSize(scaled.size())
+        if scaled != None:
+            image_label.setPixmap(scaled)
+            image_label.setFixedSize(scaled.size())
         return image_label
     
     @override
@@ -23,8 +24,9 @@ class PreviewImage(PreviewItem):
             return
         self.curr_size = new_size
         scaled = self.image.scaled(new_size)
-        self.image_label.setPixmap(scaled)
-        self.image_label.setFixedSize(scaled.size())
+        if scaled != None:
+            self.image_label.setPixmap(scaled)
+            self.image_label.setFixedSize(scaled.size())
         
     @override
     def copyOf(self) -> 'PreviewImage':

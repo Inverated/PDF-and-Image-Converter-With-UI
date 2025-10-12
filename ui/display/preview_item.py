@@ -39,7 +39,8 @@ class PreviewItem(QWidget):
         self.image_label:QLabel = self.setImage()
         
         self.image_stack.addWidget(top_indicator)
-        self.image_stack.addWidget(self.image_label, alignment=Qt.AlignHCenter)
+        if not self.image_label.pixmap().isNull():  
+            self.image_stack.addWidget(self.image_label, alignment=Qt.AlignHCenter)
         self.image_stack.addWidget(self.image_title, alignment=Qt.AlignHCenter)
         self.image_stack.addWidget(bottom_indicator)
 
@@ -124,12 +125,15 @@ class PreviewItem(QWidget):
     def mouseMoveEvent(self, event):
         if event.buttons() == Qt.MouseButton.LeftButton:
             drag = QDrag(self)
-            mime = QMimeData()
-            drag.setMimeData(mime)
-            #Preview drag
-            width = self.image_label.width()
-            height = self.image_label.height()
-            drag.setPixmap(self.image_label.pixmap().scaled(self.drag_width_px, height/width * self.drag_width_px, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            qpixmap = self.image_label.pixmap()
+            if not qpixmap.isNull():
+                mime = QMimeData()
+                drag.setMimeData(mime)
+                #Preview drag
+                width = self.image_label.width()
+                height = self.image_label.height()
+                
+                drag.setPixmap(qpixmap.scaled(self.drag_width_px, height/width * self.drag_width_px, Qt.KeepAspectRatio, Qt.SmoothTransformation))
             drag.exec(Qt.DropAction.MoveAction)
 
     def set_top_indicator(self, show:bool):

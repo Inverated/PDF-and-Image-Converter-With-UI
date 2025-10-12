@@ -123,7 +123,7 @@ class Preview(QWidget):
         return val       
             
     def __update_saved_size(self, page:PreviewItem, is_new = True): #change to a better data structure later
-        new_width =  page.image.getWidth()
+        new_width = page.image.getWidth()
         new_height = page.image.getHeight()
         if not is_new:
             if self.widget_stack.count() == 0:
