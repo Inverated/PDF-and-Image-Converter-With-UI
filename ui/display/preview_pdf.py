@@ -58,12 +58,15 @@ class PreviewPdf(PreviewItem):
     def copyOf(self) -> 'PreviewPdf':
         return PreviewPdf(self.page_no, self.document_name, self.full_path, self.extension, self.document_page_range, self.image, self.curr_size)
     
+    def disablePreview(self):
+        return PreviewPdf(self.page_no, self.document_name, self.full_path, self.extension, self.document_page_range, PixMap(None, 0, 0), self.curr_size)
+    
     @override
     def mouseMoveEvent(self, event):
         if event.buttons() == Qt.MouseButton.LeftButton:
             drag = QDrag(self)
+            mime = QMimeData()
+            drag.setMimeData(mime)
             if self.drag_image != None:
-                mime = QMimeData()
-                drag.setMimeData(mime)
                 drag.setPixmap(self.drag_image)
             drag.exec(Qt.DropAction.MoveAction)

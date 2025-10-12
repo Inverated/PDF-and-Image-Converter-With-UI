@@ -172,18 +172,17 @@ class File(QWidget):
             page_range = [curr_page, curr_page]
             page_size = doc.pagePointSize(page_no)
             
-            ori_width, ori_height = int(page_size.width()), int(page_size.height())
-            
-            #rendering at 1.5 times to be slightly clearer (*2 too slow for very large file)
-            width, height = ori_width * 1.5, ori_height * 1.5   
-
-            options = QPdfDocumentRenderOptions()
-            options.antialiasing = True
-            options.textAntialiasing = True
-
-            rendered_page = doc.render(page_no, QSize(width, height), options)
-
             if self.renderImage:
+                ori_width, ori_height = int(page_size.width()), int(page_size.height())
+                
+                #rendering at 1.5 times to be slightly clearer (*2 too slow for very large file)
+                width, height = ori_width * 1.5, ori_height * 1.5   
+
+                options = QPdfDocumentRenderOptions()
+                options.antialiasing = True
+                options.textAntialiasing = True
+
+                rendered_page = doc.render(page_no, QSize(width, height), options)
                 pixmap = PixMap(rendered_page, ori_width, ori_height)   #scale back to original size with same resolution
             else:
                 pixmap = PixMap(None, 0, 0)

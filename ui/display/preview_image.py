@@ -31,3 +31,6 @@ class PreviewImage(PreviewItem):
     @override
     def copyOf(self) -> 'PreviewImage':
         return PreviewImage(self.page_no, self.document_name, self.full_path, self.extension, self.document_page_range, self.image, self.curr_size)
+    
+    def disablePreview(self):
+        return PreviewImage(self.page_no, self.document_name, self.full_path, self.extension, self.document_page_range, PixMap(None, 0, 0), self.curr_size)

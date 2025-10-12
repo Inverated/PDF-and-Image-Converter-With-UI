@@ -65,6 +65,24 @@ class Preview(QWidget):
         layout.addLayout(option_bar)
         self.setLayout(layout)
     
+    def disablePreview(self):
+        new_list:list[PreviewItem] = []
+        del_list:list[PreviewItem] = []
+        size = self.widget_stack.count()
+        for i in range(size):
+            item:PreviewItem = self.widget_stack.itemAt(i).widget()
+            if item.image_label.pixmap().isNull():
+                new_list.append(item)
+            else:
+                new_list.append(item.disablePreview())
+                del_list.append(item)
+                
+        for each in new_list:
+            each.setParent(None)
+            self.widget_stack.addWidget(each)
+        for each in del_list:
+            each.deleteLater()
+            
     def __clearAllWidget(self):
         self.max_width = self.max_height  = -1
         self.min_height = self.min_width = 99999 

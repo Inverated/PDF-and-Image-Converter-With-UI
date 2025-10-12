@@ -15,7 +15,7 @@ class OptionBar(QToolBar):
         
         self.preview_toggle = QAction("Preview Enabled", self)
         self.preview_toggle.setToolTip("""Change the ability to render image for preview
-                                  Disable to reduce memory usage""")
+                                  Disable to reduce memory usage (Must reupload to enable preview)""")
         self.preview_toggle.triggered.connect(self.set_preview)
         self.addAction(self.preview_toggle)
         

@@ -66,6 +66,9 @@ class PreviewItem(QWidget):
                 
         self.setLayout(layout)
     
+    def disablePreview(self):
+        return self
+        
     def getImage(self):
         return self.image
     
@@ -125,10 +128,10 @@ class PreviewItem(QWidget):
     def mouseMoveEvent(self, event):
         if event.buttons() == Qt.MouseButton.LeftButton:
             drag = QDrag(self)
+            mime = QMimeData()
+            drag.setMimeData(mime)
             qpixmap = self.image_label.pixmap()
             if not qpixmap.isNull():
-                mime = QMimeData()
-                drag.setMimeData(mime)
                 #Preview drag
                 width = self.image_label.width()
                 height = self.image_label.height()

@@ -51,7 +51,9 @@ class MainWindow(QMainWindow):
         
         self.setContextMenuPolicy(Qt.NoContextMenu)
     
-    def set_preview_state(enable:bool):
+    def set_preview_state(self, enable:bool):
+        if not enable:
+            self.preview_list_widget.disablePreview()
         return
     
     def set_theme(dark:bool):
