@@ -1,7 +1,6 @@
 from ui.display.preview_item import PreviewItem
 
-from fitz import open as open_doc, Document, Matrix, Rect, Page
-import fitz
+from fitz import open as open_doc, Document, Matrix, Page
 
 class Downloader:
     #no need to add signal for download progress, very fast
@@ -43,8 +42,6 @@ class Downloader:
                     page_no += 1
             else:
                 self.output.insert_file(file, from_page=docRange[0] - 1, to_page=docRange[1] - 1)
-            
-           
                 
         try:
             if not save_location.endswith("pdf"):
@@ -59,7 +56,7 @@ class Downloader:
                 self.output.save(save_location)
             
         except Exception as e:
-            print(e)
+            #print(e)
             return (False, "Unable to save at {}".format(save_location))   
         finally:
             self.close_all_files(opened_files) 
@@ -67,7 +64,7 @@ class Downloader:
         
     def open_file(self, path):
         try:
-            return fitz.open(path) 
+            return open_doc.open(path) 
         except:
             return None
     

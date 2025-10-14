@@ -136,9 +136,9 @@ class File(QWidget):
             self.label2.setStyleSheet("color: grey")    
         else:
             self.label.setText("{}{}".format(self.document_name, self.extension))
-            self.label.setStyleSheet("color: white")  
+            self.label.setStyleSheet("")
             self.label2.setText("{}\t{:>5} page(s)".format("" if self.renderImage else "[Preview disabled]", self.page_count))
-            self.label2.setStyleSheet("color: white")  
+            self.label2.setStyleSheet("")  
             self.hasDisabledRender = True  
 
     

@@ -141,6 +141,8 @@ class Preview(QWidget):
             temp.update_page_no(curr_page_no)
             docRange = temp.document_page_range
             curr_page_no += docRange[1] - docRange[0] + 1
+            temp.set_bottom_indicator(show=False)
+            temp.set_top_indicator(show=False)
              
     def remove_page(self, page:PreviewItem):
         page.setParent(None)
@@ -294,7 +296,6 @@ class Preview(QWidget):
             self.__reorderInternalItems(event)
             
         event.accept()
-        self.resetIndicators()
         self.__reset_page_no()
     
     def __addFromFileList(self, event:QDropEvent):

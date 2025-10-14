@@ -6,8 +6,11 @@ from ui.display.preview_widget import Preview
 from ui.files.file_tab_widget import SideList
 from ui.option_bar import OptionBar
 
+from PySide6.QtCore import Signal
 
 class MainWindow(QMainWindow):
+    darkMode = Signal(bool)
+    
     def __init__(self):
         super().__init__()
         self.prev_open_dir = None
@@ -26,6 +29,9 @@ class MainWindow(QMainWindow):
         layout = QHBoxLayout()
 
         splitter = QSplitter(Qt.Horizontal)
+        splitter.setHandleWidth(10)
+        splitter.show()
+        
         self.preview_list_widget = Preview()
         self.file_list_widget = SideList()
         
@@ -58,7 +64,8 @@ class MainWindow(QMainWindow):
         self.file_list_widget.setPreviewStatus(enable)
         return
     
-    def set_theme(dark:bool):
+    def set_theme(self, dark:bool):
+        self.darkMode.emit(dark)
         return
     
     def setNormaliseChoice(self, choice):

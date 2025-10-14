@@ -1,4 +1,4 @@
-import os
+from os import path as path_of
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QStyle, QFileDialog, QSizePolicy, QFrame, QLabel, QCheckBox, QRadioButton
 from PySide6.QtCore import QSize, Signal
 
@@ -40,7 +40,7 @@ class SideList(QWidget):
         
         # file stack to contain file widget
         self.file_stack = QVBoxLayout()
-        self.__openTestFiles()
+        #self.__openTestFiles()
         
         container.setLayout(self.file_stack)
         selection_area.setWidget(container)
@@ -109,8 +109,8 @@ class SideList(QWidget):
         if len(selected[0]) == 0:
             return
         
-        self.prev_open_dir = os.path.dirname(selected[0][0])
-        #can make this async and add loading bar to File widget?
+        self.prev_open_dir = path_of.dirname(selected[0][0])
+
         for path in selected[0]:
             self.__addToStack(File(path, self.previewStatus))
         
@@ -148,7 +148,7 @@ class SideList(QWidget):
         return
     
     #open from test dir
-    def __openTestFiles(self):
+    '''def __openTestFiles(self):
         files = []
         contents = os.listdir('test')
         for each in contents:
@@ -157,7 +157,7 @@ class SideList(QWidget):
                 files.append(File('test/' + each, self.previewStatus))
                 
         for item in files:
-            self.__addToStack(item)
+            self.__addToStack(item)'''
             
             
     def __addToStack(self, item:File):

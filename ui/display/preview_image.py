@@ -1,7 +1,6 @@
 from typing import override
-from backend.file_downloader import Downloader
 from ui.display.preview_item import PreviewItem
-from PySide6.QtWidgets import QLabel, QFileDialog
+from PySide6.QtWidgets import QLabel
 from ui.display.image import PixMap
 
 class PreviewImage(PreviewItem):
