@@ -19,9 +19,9 @@ class File(QWidget):
     renderProgress = Signal(int)
     
     removeRequested = Signal(QWidget)
-    def __init__(self, path_name:str):
+    def __init__(self, path_name:str, renderImage: bool):
         super().__init__()
-        self.renderImage = True
+        self.renderImage = renderImage
         self.drag_width_px = 200
         self.initial_page_size = 100
         self.drag_image = None
@@ -71,8 +71,6 @@ class File(QWidget):
     
     def setRender(self, render:bool):
         self.renderImage = render
-        if self.drag_image == None:
-            self.__re_render()
             
     def end_thread(self):
         self.running_thread.join()
@@ -138,7 +136,7 @@ class File(QWidget):
         else:
             self.label.setText("{}{}".format(self.document_name, self.extension))
             self.label.setStyleSheet("color: white")  
-            self.label2.setText("{}\t{:>5} page(s)".format("" if self.renderImage else "Preview disabled", self.page_count))
+            self.label2.setText("{}\t{:>5} page(s)".format("" if self.renderImage else "[Preview disabled]", self.page_count))
             self.label2.setStyleSheet("color: white")    
 
     
@@ -152,7 +150,7 @@ class File(QWidget):
         if self.renderImage:
             pixmap = PixMap(image, image.width(), image.height())
         else:
-            pixmap = PixMap(None, 0, 0)    
+            pixmap = PixMap(None, image.width(), image.height())
         self.page_count = 1
         self.setFileName()
         return [PreviewImage(page_no=1, document_name=self.document_name, full_path=self.path_name, extension=self.extension,
@@ -171,10 +169,9 @@ class File(QWidget):
             curr_page = page_no + 1
             page_range = [curr_page, curr_page]
             page_size = doc.pagePointSize(page_no)
+            ori_width, ori_height = int(page_size.width()), int(page_size.height())
             
-            if self.renderImage:
-                ori_width, ori_height = int(page_size.width()), int(page_size.height())
-                
+            if self.renderImage:                
                 #rendering at 1.5 times to be slightly clearer (*2 too slow for very large file)
                 width, height = ori_width * 1.5, ori_height * 1.5   
 
@@ -185,7 +182,7 @@ class File(QWidget):
                 rendered_page = doc.render(page_no, QSize(width, height), options)
                 pixmap = PixMap(rendered_page, ori_width, ori_height)   #scale back to original size with same resolution
             else:
-                pixmap = PixMap(None, 0, 0)
+                pixmap = PixMap(None, ori_width, ori_height)
                 
             image_list.append(PreviewPdf(page_no=curr_page, document_name=self.document_name, full_path=self.path_name, extension=self.extension,
                                           document_page_range=page_range, curr_size=self.initial_page_size,

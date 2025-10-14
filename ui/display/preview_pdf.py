@@ -56,10 +56,14 @@ class PreviewPdf(PreviewItem):
         
     @override
     def copyOf(self) -> 'PreviewPdf':
-        return PreviewPdf(self.page_no, self.document_name, self.full_path, self.extension, self.document_page_range, self.image, self.curr_size)
+        out = PreviewPdf(self.page_no, self.document_name, self.full_path, self.extension, self.document_page_range, self.image, self.curr_size)
+        self.deleteLater()
+        return out
     
     def disablePreview(self):
-        return PreviewPdf(self.page_no, self.document_name, self.full_path, self.extension, self.document_page_range, PixMap(None, 0, 0), self.curr_size)
+        out = PreviewPdf(self.page_no, self.document_name, self.full_path, self.extension, self.document_page_range, PixMap(None, self.image.getWidth(), self.image.getHeight()), self.curr_size)
+        self.deleteLater()
+        return out
     
     @override
     def mouseMoveEvent(self, event):

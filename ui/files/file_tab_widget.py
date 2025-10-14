@@ -14,6 +14,8 @@ class SideList(QWidget):
         self.prev_open_dir = None    #re open open file from same dir
         self.setMinimumWidth(250)   #cannot shrink below
         self.setAcceptDrops(True)
+        self.previewStatus = True
+        
         layout = QVBoxLayout()
 
         # Top row
@@ -91,6 +93,12 @@ class SideList(QWidget):
         
         self.setLayout(layout)
        
+    def setPreviewStatus(self, preview:bool):
+        self.previewStatus = preview
+        for i in range(0, self.file_stack.count(), 2):
+            file:File = self.file_stack.itemAt(i).widget()
+            file.setRender(preview)
+        
     def set_status_message(self, message, color):
         self.status.setText(message)
         self.status.setStyleSheet("color: {};".format(color))
@@ -104,7 +112,7 @@ class SideList(QWidget):
         self.prev_open_dir = os.path.dirname(selected[0][0])
         #can make this async and add loading bar to File widget?
         for path in selected[0]:
-            self.__addToStack(File(path))
+            self.__addToStack(File(path, self.previewStatus))
         
     def dragEnterEvent(self, event):
         event.accept()
@@ -115,9 +123,6 @@ class SideList(QWidget):
             self.normaliseChoice.emit(True)
         elif self.isMax.isChecked():
             self.normaliseChoice.emit(False)
-         
-    def normaliseMax(self, state):
-        return
         
     def normaliseWidth(self, state):
         if state == 2:
@@ -149,7 +154,7 @@ class SideList(QWidget):
         for each in contents:
             ext = each[-3:]
             if ext == 'jpg' or ext == 'pdf':
-                files.append(File('test/' + each))
+                files.append(File('test/' + each, self.previewStatus))
                 
         for item in files:
             self.__addToStack(item)

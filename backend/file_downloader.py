@@ -7,43 +7,50 @@ class Downloader:
     #no need to add signal for download progress, very fast
     def downloadFile(self, fileList:list[PreviewItem], save_location:str, scaled:bool = False):
         # returns (successful, message)
-        opened_files:dict[str, Document | None] = dict()
+        opened_files:dict[str, Document] = dict()
         
         for each in fileList:
             if each.full_path in opened_files:
                 continue
-            doc = self.open_file(each.full_path) if not (scaled and not each.extension == 'pdf') else None
-            #No need to open image if scaled, will open later 
+            doc = self.open_file(each.full_path)
+
             if doc == None:
                 return (False, "File not found at {}".format(each.full_path))
             opened_files[each.full_path] = doc
 
         self.output = open_doc()
-        for i, each in enumerate(fileList):
+        page_no = 0
+        for each in fileList:
             file = opened_files[each.full_path]
-            range = each.document_page_range
+            docRange = each.document_page_range
             
             if scaled:
-                new_page:Page = self.output.new_page(i, each.image.normWidth, each.image.normHeight)
-                if each.extension == 'pdf':
-                    new_page.show_pdf_page(
-                        new_page.rect,
-                        file, 
-                        range[0]-1   
-                    )
+                if each.extension == '.pdf':
+                    for i in range(docRange[0]-1, docRange[1]):
+                        new_page:Page = self.output.new_page(page_no, each.image.normWidth, each.image.normHeight)
+                        new_page.show_pdf_page(
+                            new_page.rect,
+                            file, 
+                            i  
+                        )
+                        page_no += 1
                 else:
+                    new_page:Page = self.output.new_page(page_no, each.image.normWidth, each.image.normHeight)
                     new_page.insert_image(
                         new_page.rect,
                         filename=each.full_path
                     )
+                    page_no += 1
             else:
-                self.output.insert_file(file, from_page=range[0] - 1, to_page=range[1] - 1)
+                self.output.insert_file(file, from_page=docRange[0] - 1, to_page=docRange[1] - 1)
+            
+           
                 
         try:
-            if save_location.endswith("pdf"):
+            if not save_location.endswith("pdf"):
                 page = self.output.load_page(0)
                 mtx = Matrix(1, 1)
-                if fileList[0].extension == 'pdf':
+                if fileList[0].extension == '.pdf':
                     #pdf very blurry otherwise
                     mtx = Matrix(2, 2)
                 pix = page.get_pixmap(matrix=mtx)
@@ -60,7 +67,7 @@ class Downloader:
         
     def open_file(self, path):
         try:
-            return open_doc(path) 
+            return fitz.open(path) 
         except:
             return None
     

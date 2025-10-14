@@ -19,6 +19,7 @@ class Preview(QWidget):
         self.min_height = self.min_width = 99999 
         self.normalisedState = 0
         self.normalisedWidth = True
+        self.previewStatus = True
         
         self.setAcceptDrops(True)  
         layout = QVBoxLayout()
@@ -64,6 +65,9 @@ class Preview(QWidget):
         layout.addLayout(items)
         layout.addLayout(option_bar)
         self.setLayout(layout)
+    
+    def setPreviewStatus(self, status):
+        self.previewStatus = status
     
     def disablePreview(self):
         new_list:list[PreviewItem] = []
@@ -293,19 +297,27 @@ class Preview(QWidget):
 
         if self.widget_stack.count() == 0:
             n = 0
-        
+
         if self.compact_checkbox.isChecked():
             for item in widget.image_list:
                 self.__update_saved_size(item, is_new=True)
-            first:PreviewItem = widget.image_list[0].copyOf()
-            first.compact_list(widget.image_list[1:])
+            
+            if self.previewStatus:
+                first:PreviewItem = widget.image_list[0].copyOf()
+                first.compact_list([each.copyOf() for each in widget.image_list[1:]])
+            else:
+                first:PreviewItem = widget.image_list[0].copyOf().disablePreview()
+                first.compact_list([each.copyOf().disablePreview() for each in widget.image_list[1:]])
             first.update_image_size(self.image_size)
             self.widget_stack.insertWidget(n, first)
             self.__normaliseImage(first)
         else:
             for i, item in enumerate(widget.image_list):
                 self.__update_saved_size(item, is_new=True)
-                item_copy:PreviewItem = item.copyOf()
+                if self.previewStatus:
+                    item_copy:PreviewItem = item.copyOf()
+                else:
+                    item_copy:PreviewItem = item.copyOf().disablePreview()    
                 item_copy.update_image_size(self.image_size)
                 self.widget_stack.insertWidget(n + i, item_copy)
                 self.__normaliseImage(item)

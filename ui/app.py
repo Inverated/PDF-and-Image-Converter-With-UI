@@ -54,6 +54,8 @@ class MainWindow(QMainWindow):
     def set_preview_state(self, enable:bool):
         if not enable:
             self.preview_list_widget.disablePreview()
+        self.preview_list_widget.setPreviewStatus(enable)
+        self.file_list_widget.setPreviewStatus(enable)
         return
     
     def set_theme(dark:bool):
