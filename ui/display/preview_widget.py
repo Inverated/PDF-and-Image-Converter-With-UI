@@ -312,8 +312,8 @@ class Preview(QWidget):
                 first:PreviewItem = widget.image_list[0].copyOf()
                 first.compact_list([each.copyOf() for each in widget.image_list[1:]])
             else:
-                first:PreviewItem = widget.image_list[0].copyOf().disablePreview()
-                first.compact_list([each.copyOf().disablePreview() for each in widget.image_list[1:]])
+                first:PreviewItem = widget.image_list[0].disablePreview()
+                first.compact_list([each.disablePreview() for each in widget.image_list[1:]])
             first.update_image_size(self.image_size)
             self.widget_stack.insertWidget(n, first)
             self.__normaliseImage(first)
@@ -323,7 +323,7 @@ class Preview(QWidget):
                 if self.previewStatus:
                     item_copy:PreviewItem = item.copyOf()
                 else:
-                    item_copy:PreviewItem = item.copyOf().disablePreview()    
+                    item_copy:PreviewItem = item.disablePreview()    
                 item_copy.update_image_size(self.image_size)
                 self.widget_stack.insertWidget(n + i, item_copy)
                 self.__normaliseImage(item)
