@@ -86,6 +86,7 @@ class Preview(QWidget):
             self.widget_stack.addWidget(each)
         for each in del_list:
             each.deleteLater()
+        self.implementWidgetConnection()
             
     def __clearAllWidget(self):
         self.max_width = self.max_height  = -1
@@ -134,9 +135,12 @@ class Preview(QWidget):
         self.image_size = value
        
     def __reset_page_no(self):
+        curr_page_no = 1
         for i in range(self.widget_stack.count()):
             temp:PreviewItem = self.widget_stack.itemAt(i).widget()
-            temp.update_page_no(i + 1)
+            temp.update_page_no(curr_page_no)
+            docRange = temp.document_page_range
+            curr_page_no += docRange[1] - docRange[0] + 1
              
     def remove_page(self, page:PreviewItem):
         page.setParent(None)
@@ -193,17 +197,19 @@ class Preview(QWidget):
             start:PreviewItem = self.widget_stack.itemAt(0).widget()
             new_stack:list[PreviewItem] = []
             
-            for i in range(1, self.widget_stack.count()):
-                curr_item:PreviewItem = self.widget_stack.itemAt(i).widget()
+            for i in range(0, self.widget_stack.count()):
+                curr_item:PreviewItem = self.widget_stack.itemAt(0).widget()
+                curr_item.setParent(None)
                 if curr_item.document_name == start.document_name and curr_item.document_page_range[0] == start.document_page_range[1] + 1:
                     start = start.compact(curr_item)
                 else:
                     new_stack.append(start)
                     start = curr_item
-            if start not in new_stack:
+                    
+            if not start == new_stack[-1]:
                 new_stack.append(start)
                         
-            self.__clear_unused_widget_stack(new_stack)
+            #self.__clear_unused_widget_stack(new_stack)
             for each in new_stack:
                 self.widget_stack.addWidget(each)
                 
@@ -229,12 +235,12 @@ class Preview(QWidget):
             self.implementWidgetConnection()
             return
                 
-    def __clear_unused_widget_stack(self, new_stack):
+    '''def __clear_unused_widget_stack(self, new_stack):
         while self.widget_stack.count():
             item = self.widget_stack.takeAt(0)
             widget = item.widget()
             if widget is not None and widget not in new_stack:
-                widget.setParent(None) 
+                widget.setParent(None) '''
                 
     def dragEnterEvent(self, event):
         event.accept()
