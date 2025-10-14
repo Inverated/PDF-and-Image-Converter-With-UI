@@ -22,6 +22,7 @@ class File(QWidget):
     def __init__(self, path_name:str, renderImage: bool):
         super().__init__()
         self.renderImage = renderImage
+        self.hasDisabledRender = False
         self.drag_width_px = 200
         self.initial_page_size = 100
         self.drag_image = None
@@ -137,7 +138,8 @@ class File(QWidget):
             self.label.setText("{}{}".format(self.document_name, self.extension))
             self.label.setStyleSheet("color: white")  
             self.label2.setText("{}\t{:>5} page(s)".format("" if self.renderImage else "[Preview disabled]", self.page_count))
-            self.label2.setStyleSheet("color: white")    
+            self.label2.setStyleSheet("color: white")  
+            self.hasDisabledRender = True  
 
     
     def __convert_image_to_list(self) -> list[PreviewItem]:
@@ -207,12 +209,12 @@ class File(QWidget):
             mime.setText(self.label.text() + self.label2.text())
             drag.setMimeData(mime)
             
-            if self.renderImage and self.drag_image == None:
+            if self.renderImage and not self.hasDisabledRender and self.drag_image == None:
                 print("Image not rendered properly")
                 self.end_thread()
                 return
                 
-            if self.renderImage:
+            if not self.drag_image == None:
                 drag.setPixmap(self.drag_image)
 
             drag.exec(Qt.DropAction.MoveAction)
