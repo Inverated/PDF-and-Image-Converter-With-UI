@@ -1,4 +1,6 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QScrollArea, QSizePolicy, QPushButton
+import threading
+
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QScrollArea, QSizePolicy, QPushButton, QMessageBox
 from PySide6.QtCore import Signal, Qt
 from PySide6.QtGui import QDropEvent, QDragMoveEvent
 
@@ -7,9 +9,12 @@ from ui.display.preview_item import PreviewItem
 from ui.display.size_slider import SizeSliderLayout
 
 from ui.files.file import File
+from ui.popup_message import Popup
 
 class Preview(QWidget):
     downloadItem = Signal(list)
+    progressRange = Signal(int)
+    progressProgress = Signal(int)
     
     def __init__(self):
         super().__init__()
@@ -20,6 +25,9 @@ class Preview(QWidget):
         self.normalisedState = 0
         self.normalisedWidth = True
         self.previewStatus = True
+        
+        self.runningThread = None
+        self.dialog = None
         
         self.setAcceptDrops(True)  
         layout = QVBoxLayout()
@@ -88,7 +96,7 @@ class Preview(QWidget):
             each.deleteLater()
         self.implementWidgetConnection()
             
-    def __clearAllWidget(self):
+    def __clearAllWidget(self):            
         self.max_width = self.max_height  = -1
         self.min_height = self.min_width = 99999 
         while self.widget_stack.count():
@@ -189,6 +197,22 @@ class Preview(QWidget):
                 self.max_height = new_height
             if new_height < self.min_height:
                 self.min_height = new_height
+    
+    def start_new_thread(self, method, *args):
+        self.dialog = Popup(self)
+        
+        self.runningThread = threading.Thread(method, args=args, daemon=True)
+        self.progressRange.connect(self.dialog.setBarRange, Qt.ConnectionType.UniqueConnection)
+        self.progressProgress.connect(self.dialog.setBarVal, Qt.ConnectionType.UniqueConnection)
+        
+        if not self.dialog.exec_():
+            
+            print('cx')
+    
+    def end_thread(self):
+        if not self.dialog == None:
+            self.runningThread.join()
+            self.dialog.finishProgress()
             
     def set_compact_view(self, compact):
         if self.widget_stack.count() == 0:
@@ -196,47 +220,53 @@ class Preview(QWidget):
         
         #0 not checked, 1 partially checked, 2 checked
         if compact == 2:
-            start:PreviewItem = self.widget_stack.itemAt(0).widget()
-            new_stack:list[PreviewItem] = []
-            
-            for i in range(0, self.widget_stack.count()):
-                curr_item:PreviewItem = self.widget_stack.itemAt(0).widget()
-                curr_item.setParent(None)
-                if curr_item.document_name == start.document_name and curr_item.document_page_range[0] == start.document_page_range[1] + 1:
-                    start = start.compact(curr_item)
-                else:
-                    new_stack.append(start)
-                    start = curr_item
-                    
-            if not start == new_stack[-1]:
-                new_stack.append(start)
-                        
-            #self.__clear_unused_widget_stack(new_stack)
-            for each in new_stack:
-                self.widget_stack.addWidget(each)
-                
-            self.__reset_page_no()
-            self.implementWidgetConnection()
+            self.__compactList()
         
         elif compact == 0:
-            #store loaded data in list of list for pdf pages? and retrieve to uncompact 
-            new_stack:list[PreviewItem] = []
-            for i in range(self.widget_stack.count()):
-                item:PreviewItem = self.widget_stack.itemAt(0).widget()
-                contains = item.uncompact()
-                new_stack.append(item)
-                if contains != None:
-                    new_stack.extend(contains)
-                item.setParent(None)
-                    
-            for each in new_stack:
-                self.widget_stack.addWidget(each)
-                self.__normaliseImage(each)       
-            
-            self.__reset_page_no()
-            self.implementWidgetConnection()
-            return
+            self.__unCompactList()
+    
+    def __compactList(self):
+        start:PreviewItem = self.widget_stack.itemAt(0).widget()
+        new_stack:list[PreviewItem] = []
+        
+        for i in range(0, self.widget_stack.count()):
+            curr_item:PreviewItem = self.widget_stack.itemAt(0).widget()
+            curr_item.setParent(None)
+            if curr_item.document_name == start.document_name and curr_item.document_page_range[0] == start.document_page_range[1] + 1:
+                start = start.compact(curr_item)
+            else:
+                new_stack.append(start)
+                start = curr_item
                 
+        if not start == new_stack[-1]:
+            new_stack.append(start)
+                    
+        #self.__clear_unused_widget_stack(new_stack)
+        for each in new_stack:
+            self.widget_stack.addWidget(each)
+            
+        self.__reset_page_no()
+        self.implementWidgetConnection()
+    
+    def __unCompactList(self):
+        #store loaded data in list of list for pdf pages? and retrieve to uncompact 
+        new_stack:list[PreviewItem] = []
+        for _ in range(self.widget_stack.count()):
+            item:PreviewItem = self.widget_stack.itemAt(0).widget()
+            contains = item.uncompact()
+            new_stack.append(item)
+            if contains != None:
+                new_stack.extend(contains)
+            item.setParent(None)
+                
+        for each in new_stack:
+            self.widget_stack.addWidget(each)
+            self.__normaliseImage(each)       
+        
+        self.__reset_page_no()
+        self.implementWidgetConnection()
+        return
+    
     '''def __clear_unused_widget_stack(self, new_stack):
         while self.widget_stack.count():
             item = self.widget_stack.takeAt(0)

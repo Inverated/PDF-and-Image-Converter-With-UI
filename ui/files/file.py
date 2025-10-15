@@ -82,7 +82,7 @@ class File(QWidget):
                 self.label2.setText("Unable to render image, please upload again") 
                 self.label2.setStyleSheet("color: red")  
             else:
-                print("Fail " + str(self.render_attempt))
+                #print("Fail " + str(self.render_attempt))
                 self.__re_render()
                 self.render_attempt += 1
     
@@ -192,7 +192,7 @@ class File(QWidget):
             try:
                 self.renderProgress.emit(page_no)
             except:
-                print("App forcefully quit")
+                #print("App forcefully quit")
                 return #app quit
             
         doc.deleteLater()
@@ -210,7 +210,7 @@ class File(QWidget):
             drag.setMimeData(mime)
             
             if self.renderImage and not self.hasDisabledRender and self.drag_image == None:
-                print("Image not rendered properly")
+                #print("Image not rendered properly")
                 self.end_thread()
                 return
                 
