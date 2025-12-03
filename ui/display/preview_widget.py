@@ -1,4 +1,5 @@
 import threading
+import time
 
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QScrollArea, QSizePolicy, QPushButton, QMessageBox
 from PySide6.QtCore import Signal, Qt
@@ -8,6 +9,7 @@ from ui.display.image import PixMap
 from ui.display.preview_item import PreviewItem
 from ui.display.size_slider import SizeSliderLayout
 
+from ui.display.imageTimer import ImageUpdateTimer
 from ui.files.file import File
 from ui.popup_message import Popup
 
@@ -25,6 +27,8 @@ class Preview(QWidget):
         self.normalisedState = 0
         self.normalisedWidth = True
         self.previewStatus = True
+        self.sizeUpdateTimer = {'start':0, 'end':0}
+        self.skipUpdate = False
         
         self.runningThread = None
         self.dialog = None
@@ -62,7 +66,9 @@ class Preview(QWidget):
         
         self.size_slider = SizeSliderLayout(image_size=self.image_size)
         
-        self.size_slider.connect(self.update_size)
+        self.timer = ImageUpdateTimer(interval=100)
+        self.timer.valueStopped.connect(self.setFinalSizing)
+        self.size_slider.connectValueChanged(self.update_size)
         self.implementWidgetConnection()
         
         option_bar.addWidget(self.compact_checkbox)
@@ -128,13 +134,40 @@ class Preview(QWidget):
             self.__normaliseImage(preview_item_wid)
     
     def implementWidgetConnection(self):
+        self.size_slider.connectValueChanged(self.__triggerUpdateSize)
+        self.timer.set_slider(self.size_slider.slider)
         for i in range(self.widget_stack.count()):
             preview_item_wid:PreviewItem = self.widget_stack.itemAt(i).widget()            
-            self.size_slider.connect(preview_item_wid.update_image_size)
             preview_item_wid.removeRequested.connect(self.remove_page, Qt.ConnectionType.UniqueConnection)               
             preview_item_wid.downloadRequested.connect(self.download_item, Qt.ConnectionType.UniqueConnection)
             preview_item_wid.update_image_size(self.image_size)
     
+    def __triggerUpdateSize(self):
+        if self.skipUpdate:
+            return
+        
+        if self.sizeUpdateTimer['start'] == 0:
+            self.sizeUpdateTimer['start'] = time.time()
+            
+        self.updateSize()
+        self.sizeUpdateTimer['end'] = time.time()
+        
+        time_taken = self.sizeUpdateTimer['end'] - self.sizeUpdateTimer['start']
+        if time_taken > 0.05:
+            self.skipUpdate = True
+        self.sizeUpdateTimer['start'] = 0
+    
+    def setFinalSizing(self):
+        self.skipUpdate = False
+        self.sizeUpdateTimer['start'] = 0
+        self.sizeUpdateTimer['end'] = 0
+        self.updateSize()
+    
+    def updateSize(self):
+        for i in range(self.widget_stack.count()):
+            preview_item_wid:PreviewItem = self.widget_stack.itemAt(i).widget()            
+            preview_item_wid.update_image_size(self.image_size)
+            
     def download_item(self, item):
         self.downloadItem.emit(item)
         
@@ -206,7 +239,6 @@ class Preview(QWidget):
         self.progressProgress.connect(self.dialog.setBarVal, Qt.ConnectionType.UniqueConnection)
         
         if not self.dialog.exec_():
-            
             print('cx')
     
     def end_thread(self):

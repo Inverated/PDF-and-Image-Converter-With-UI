@@ -24,9 +24,9 @@ class SizeSliderLayout(QHBoxLayout):
 
         self.label.setText(str(value) + '%')
         
-    def connect(self, method):
-        self.slider.valueChanged.connect(method)
-
+    def connectValueChanged(self, method):
+        self.slider.valueChanged.connect(method)        
+    
 class Slider(QSlider):
     def __init__(self, orientation):
         super().__init__(orientation)
@@ -36,4 +36,4 @@ class Slider(QSlider):
         step = self.singleStep()
         snapped = round(self.value() / step) * step
         self.setValue(snapped)
-        
+    
