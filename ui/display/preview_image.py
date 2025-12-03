@@ -2,6 +2,8 @@ from typing import override
 from ui.display.preview_item import PreviewItem
 from PySide6.QtWidgets import QLabel
 from ui.display.image import PixMap
+from PySide6.QtGui import QDrag
+from PySide6.QtCore import Qt, QMimeData
 
 class PreviewImage(PreviewItem):
     def __init__(self, page_no:int, document_name:str, full_path:str, extension:str, document_page_range:list = None, image:PixMap = None, curr_size:int = 100, contains:list = None):
@@ -37,3 +39,18 @@ class PreviewImage(PreviewItem):
         out = PreviewImage(self.page_no, self.document_name, self.full_path, self.extension, self.document_page_range, PixMap(None, self.image.getWidth(), self.image.getHeight()), self.curr_size)
         self.deleteLater()
         return out
+    
+    @override
+    def mouseMoveEvent(self, event):
+        if event.buttons() == Qt.MouseButton.LeftButton:
+            drag = QDrag(self)
+            mime = QMimeData()
+            drag.setMimeData(mime)
+            qpixmap = self.image_label.pixmap()
+            if not qpixmap.isNull():
+                #Preview drag
+                width = self.image_label.width()
+                height = self.image_label.height()
+                
+                drag.setPixmap(qpixmap.scaled(self.drag_width_px, height/width * self.drag_width_px, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            drag.exec(Qt.DropAction.MoveAction)

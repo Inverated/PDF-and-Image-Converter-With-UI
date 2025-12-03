@@ -1,6 +1,5 @@
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QStyle, QPushButton, QFrame
-from PySide6.QtGui import QDrag
-from PySide6.QtCore import QSize, Signal, Qt, QMimeData
+from PySide6.QtCore import QSize, Signal, Qt
 from ui.display.image import PixMap
 
 class PreviewItem(QWidget):
@@ -128,18 +127,7 @@ class PreviewItem(QWidget):
         self.image_title.setText(image_title)
         
     def mouseMoveEvent(self, event):
-        if event.buttons() == Qt.MouseButton.LeftButton:
-            drag = QDrag(self)
-            mime = QMimeData()
-            drag.setMimeData(mime)
-            qpixmap = self.image_label.pixmap()
-            if not qpixmap.isNull():
-                #Preview drag
-                width = self.image_label.width()
-                height = self.image_label.height()
-                
-                drag.setPixmap(qpixmap.scaled(self.drag_width_px, height/width * self.drag_width_px, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-            drag.exec(Qt.DropAction.MoveAction)
+        None
 
     def set_top_indicator(self, show:bool):
         qline = self.image_stack.itemAt(0).widget()
@@ -152,3 +140,5 @@ class PreviewItem(QWidget):
     def copyOf(self) -> 'PreviewItem':
         return None
 
+    def disablePreview(self):
+        None
