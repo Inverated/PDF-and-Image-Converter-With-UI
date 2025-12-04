@@ -68,10 +68,10 @@ class Downloader:
                         pix.save(save_location)
             else:
                 self.output.save(save_location)
-            return (True, f"File saved at {save_location}")      
+            return (True, f"File saved at {save_location}")
               
-        except Exception as _:
-            return (False, f"Unable to save at {save_location}")
+        except Exception as e:
+            return (False, f"Unable to save at {save_location}: {e}")
         finally:
             self.close_all_files(opened_files)
         
