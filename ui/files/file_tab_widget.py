@@ -1,5 +1,5 @@
 from os import path as path_of
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QStyle, QFileDialog, QSizePolicy, QFrame, QLabel, QCheckBox, QRadioButton
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QStyle, QFileDialog, QSizePolicy, QFrame, QLabel, QCheckBox, QRadioButton, QComboBox
 from PySide6.QtCore import QSize, Signal
 
 from ui.display.preview_content.scroll_area import ScrollArea
@@ -7,15 +7,19 @@ from ui.files.file import File
 
 class SideList(QWidget):
     downloadFile = Signal()
+    downloadFolder = Signal()
     normaliseRequest = Signal(int)
     normaliseChoice = Signal(bool)
+    changeImageFormat = Signal(str)
     
-    def __init__(self):
+    def __init__(self, image_extensions):
         super().__init__()
         self.prev_open_dir = None    #re open open file from same dir
         self.setMinimumWidth(250)   #cannot shrink below
         self.setAcceptDrops(True)
         self.previewStatus = True
+        self.image_extensions = image_extensions
+        self.setAcceptDrops(True)
         
         layout = QVBoxLayout()
 
@@ -80,11 +84,24 @@ class SideList(QWidget):
         button_row = QHBoxLayout()
         self.status = QLabel()
         self.status.setObjectName("status_label")
-        save_button = QPushButton('Save as')
+        
+        save_button = QPushButton('Save as PDF')
         save_button.clicked.connect(self.__click_save)
+        
+        save_images = QHBoxLayout()
+        save_image_button = QPushButton('Save as Image')
+        save_image_button.clicked.connect(self.__save_into_folder)
+        dropdown = QComboBox()
+        dropdown.currentTextChanged.connect(self.changeImageFormat.emit)
+        for fmt in self.image_extensions:
+            dropdown.addItem(fmt)
+        save_images.addWidget(save_image_button)
+        save_images.addWidget(dropdown)
+        
         button_row.addWidget(self.status)
         button_row.addStretch()
-        button_row.addWidget(save_button)     
+        button_row.addWidget(save_button)
+        button_row.addLayout(save_images)
         
         layout.addLayout(edit_row)
         layout.addWidget(selection_area, 2)
@@ -106,7 +123,8 @@ class SideList(QWidget):
         
     def add_files(self):
         dialog = QFileDialog()
-        selected = dialog.getOpenFileNames(None, "Select 1 or more files to open", dir=self.prev_open_dir, filter="Images/Pdf (*.pdf *.png *.jpg)")
+        filters = "Images/Pdf (*.pdf " + " ".join(f"*.{ext}" for ext in self.image_extensions) + ")"
+        selected = dialog.getOpenFileNames(None, "Select 1 or more files to open", dir=self.prev_open_dir, filter=filters)
         if len(selected[0]) == 0:
             return
         
@@ -114,7 +132,7 @@ class SideList(QWidget):
 
         for path in selected[0]:
             self.__addToStack(File(path, self.previewStatus))
-        
+            
     def dragEnterEvent(self, event):
         event.accept()
         #do nothing, just hides error cursor
@@ -183,3 +201,12 @@ class SideList(QWidget):
     def __click_save(self):
         self.downloadFile.emit()
         
+    def __save_into_folder(self):
+        self.downloadFolder.emit()
+
+    def dropEvent(self, event):
+        for url in event.mimeData().urls():
+            url = url.toLocalFile()
+            _, ext = path_of.splitext(url)
+            if ext.lower() in ('.pdf',) + tuple(f".{e}" for e in self.image_extensions):
+                self.__addToStack(File(url, self.previewStatus))

@@ -1,13 +1,14 @@
+from pathlib import Path
 from ui.display.preview_content.preview_item import PreviewItem
-
 from fitz import open as open_new_document, Document, Matrix, Page
 
 class Downloader:
     quality: int = 0
     output = open_new_document()
     
-    def __init__(self, quality: int = 0):
+    def __init__(self, quality: int = 0, chosen_image_format: str = "png"):
         self.quality = quality
+        self.chosen_image_format = chosen_image_format
         
     #no need to add signal for download progress, very fast
     def downloadFile(self, fileList:list[PreviewItem], save_location:str, scaled:bool = False):
@@ -31,7 +32,7 @@ class Downloader:
             
             if scaled:
                 if each.extension == '.pdf':
-                    for i in range(docRange[0]-1, docRange[1]):
+                    for i in range(docRange[0] - 1, docRange[1]):
                         new_page:Page = self.output.new_page(page_no, each.image.normWidth, each.image.normHeight)
                         new_page.show_pdf_page(
                             new_page.rect,
@@ -51,26 +52,32 @@ class Downloader:
                 
         try:
             if not save_location.endswith("pdf"):
-                page = self.output.load_page(0)
-                mtx = Matrix(1, 1)
-                if fileList[0].extension == '.pdf':
-                    #pdf very blurry otherwise
-                    zoom = 4 - self.quality
-                    mtx = Matrix(zoom, zoom)
-                pix = page.get_pixmap(matrix=mtx)
-                pix.save(save_location)
+                for i in range(self.output.page_count):
+                    page = self.output.load_page(i)
+                    mtx = Matrix(1, 1)
+                    if fileList[i].extension == '.pdf':
+                        #pdf very blurry otherwise
+                        zoom = 4 - self.quality
+                        mtx = Matrix(zoom, zoom)
+                    pix = page.get_pixmap(matrix=mtx)
+    
+                    path = Path(save_location)
+                    if path.exists() and path.is_dir():
+                        pix.save(save_location + f"/page_{i+1}.{self.chosen_image_format}")
+                    else:
+                        pix.save(save_location)
             else:
                 self.output.save(save_location)
-            return (True, "File saved at {}".format(save_location))      
+            return (True, f"File saved at {save_location}")      
               
         except Exception as _:
-            return (False, "Unable to save at {}".format(save_location))   
+            return (False, f"Unable to save at {save_location}")
         finally:
-            self.close_all_files(opened_files) 
-
+            self.close_all_files(opened_files)
+        
     def open_file(self, path):
         try:
-            return open_new_document(path) 
+            return open_new_document(path)
         except Exception as _:
             return None
 
