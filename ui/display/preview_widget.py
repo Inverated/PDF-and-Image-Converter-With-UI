@@ -1,17 +1,17 @@
-import threading
 import time
+import heapq
 
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QScrollArea, QSizePolicy, QPushButton
 from PySide6.QtCore import Signal, Qt
 from PySide6.QtGui import QDropEvent, QDragMoveEvent
 
 from ui.display.image import PixMap
+from ui.display.imageSizesTracker import ImageSizes
 from ui.display.preview_item import PreviewItem
 from ui.display.size_slider import SizeSliderLayout
 
 from ui.display.imageTimer import ImageUpdateTimer
 from ui.files.file import File
-from ui.popup_message import Popup
 
 class Preview(QWidget):
     downloadItem = Signal(list)
@@ -21,17 +21,12 @@ class Preview(QWidget):
     def __init__(self):
         super().__init__()
         self.image_size = 100 #default 100
-        self.time_counter = 0
-        self.max_width = self.max_height  = -1
-        self.min_height = self.min_width = 99999 
         self.normalisedState = 0
         self.normalisedWidth = True
         self.previewStatus = True
         self.sizeUpdateTimer = {'start':0, 'end':0}
         self.skipUpdate = False
-        
-        self.runningThread = None
-        self.dialog = None
+        self.image_sizes_list = ImageSizes()
         
         self.setAcceptDrops(True)  
         layout = QVBoxLayout()
@@ -103,8 +98,7 @@ class Preview(QWidget):
         self.implementWidgetConnection()
             
     def __clearAllWidget(self):            
-        self.max_width = self.max_height  = -1
-        self.min_height = self.min_width = 99999 
+        self.image_sizes_list = ImageSizes()
         while self.widget_stack.count():
             self.widget_stack.takeAt(0).widget().deleteLater()
         return
@@ -122,9 +116,11 @@ class Preview(QWidget):
         preview_item_image.resetNorm()
         match (self.normalisedState):
             case 1:
-                preview_item_image.normaliseWidth(self.min_width if self.normalisedWidth else self.min_height)
+                min_sizes = self.image_sizes_list.get_min()
+                preview_item_image.normaliseWidth(min_sizes['width'] if self.normalisedWidth else min_sizes['height'])
             case 2:
-                preview_item_image.normaliseHeight(self.min_height if self.normalisedWidth else self.max_height)
+                max_sizes = self.image_sizes_list.get_max()
+                preview_item_image.normaliseHeight(max_sizes['height'] if self.normalisedWidth else max_sizes['width'])
         preview_item_wid.update_image_size(self.image_size)
         
     def previewNormalised(self, state:0|1|2): #0 - reset; 1 - width; 2 - height
@@ -161,10 +157,12 @@ class Preview(QWidget):
         self.skipUpdate = False
         self.sizeUpdateTimer['start'] = 0
         self.sizeUpdateTimer['end'] = 0
-        self.updateSize()
+        self.updateSize(override=True)
     
-    def updateSize(self):
+    def updateSize(self, override=False):
         for i in range(self.widget_stack.count()):
+            if not override and time.time() - self.sizeUpdateTimer['start'] > 0.5:
+                break
             preview_item_wid:PreviewItem = self.widget_stack.itemAt(i).widget()            
             preview_item_wid.update_image_size(self.image_size)
             
@@ -187,64 +185,9 @@ class Preview(QWidget):
              
     def remove_page(self, page:PreviewItem):
         page.setParent(None)
-        self.__update_saved_size(page, is_new=False)
+        self.image_sizes_list.delete_size(page.image.getWidth(), page.image.getHeight())
         page.deleteLater()
         self.__reset_page_no()
-        
-    
-    def __find_val(self, find_min:bool = True, find_width:bool = True):
-        item:PreviewItem = self.widget_stack.itemAt(0).widget()
-        val = item.getImage().getWidth() if find_width else item.getImage().getHeight()
-        for i in range(1, self.widget_stack.count()):
-            item:PreviewItem = self.widget_stack.itemAt(i).widget()
-            if find_min:
-                val = item.image.getWidth() if find_width and item.image.getWidth() < val else val
-                val = item.image.getHeight() if not find_width and item.image.getHeight() < val else val
-            else:
-                val = item.image.getWidth() if find_width and item.image.getWidth() > val else val
-                val = item.image.getHeight() if not find_width and item.image.getHeight() > val else val
-        return val       
-            
-    def __update_saved_size(self, page:PreviewItem, is_new = True): #change to a better data structure later
-        new_width = page.image.getWidth()
-        new_height = page.image.getHeight()
-        if not is_new:
-            if self.widget_stack.count() == 0:
-                self.max_width = self.max_height  = -1
-                self.min_height = self.min_width = 99999 
-                return
-            if new_width == self.min_width:
-                self.min_width = self.__find_val(True, True)
-            if new_width == self.max_width:
-                self.max_width = self.__find_val(False, True)
-            if new_height == self.min_height:
-                self.min_height = self.__find_val(True, False)
-            if new_height == self.max_height:
-                self.max_height = self.__find_val(False, False)
-        else:
-            if new_width > self.max_width:
-                self.max_width = new_width
-            if new_width < self.min_width:
-                self.min_width = new_width
-            if new_height > self.max_height:
-                self.max_height = new_height
-            if new_height < self.min_height:
-                self.min_height = new_height
-    
-    def start_new_thread(self, method, *args):
-        self.dialog = Popup(self)
-        
-        self.runningThread = threading.Thread(method, args=args, daemon=True)
-        self.progressRange.connect(self.dialog.setBarRange, Qt.ConnectionType.UniqueConnection)
-        self.progressProgress.connect(self.dialog.setBarVal, Qt.ConnectionType.UniqueConnection)
-        
-        if not self.dialog.exec_():
-            print('cx')
-    
-    def end_thread(self):
-        if not self.dialog == None:
-            self.runningThread.join()
-            self.dialog.finishProgress()
             
     def set_compact_view(self, compact):
         if self.widget_stack.count() == 0:
@@ -261,7 +204,7 @@ class Preview(QWidget):
         start:PreviewItem = self.widget_stack.itemAt(0).widget()
         new_stack:list[PreviewItem] = []
         
-        for i in range(0, self.widget_stack.count()):
+        for _ in range(0, self.widget_stack.count()):
             curr_item:PreviewItem = self.widget_stack.itemAt(0).widget()
             curr_item.setParent(None)
             if curr_item.document_name == start.document_name and curr_item.document_page_range[0] == start.document_page_range[1] + 1:
@@ -369,7 +312,7 @@ class Preview(QWidget):
 
         if self.compact_checkbox.isChecked():
             for item in widget.image_list:
-                self.__update_saved_size(item, is_new=True)
+                self.image_sizes_list.add_size(item.image.getWidth(), item.image.getHeight())
             
             if self.previewStatus:
                 first:PreviewItem = widget.image_list[0].copyOf()
@@ -382,7 +325,7 @@ class Preview(QWidget):
             self.__normaliseImage(first)
         else:
             for i, item in enumerate(widget.image_list):
-                self.__update_saved_size(item, is_new=True)
+                self.image_sizes_list.add_size(item.image.getWidth(), item.image.getHeight())
                 if self.previewStatus:
                     item_copy:PreviewItem = item.copyOf()
                 else:

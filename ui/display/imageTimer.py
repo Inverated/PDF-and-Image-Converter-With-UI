@@ -14,7 +14,7 @@ class ImageUpdateTimer(QObject):
         slider.valueChanged.connect(self.on_value_changed)
         self.delay_timer.timeout.connect(self.on_value_stopped)
 
-    def on_value_changed(self, value):
+    def on_value_changed(self):
         self.delay_timer.start()
 
     def on_value_stopped(self):
