@@ -27,6 +27,18 @@ class SizeSliderLayout(QHBoxLayout):
     def connectValueChanged(self, method):
         self.slider.valueChanged.connect(method)        
     
+    def step_up(self):
+        step = self.slider.singleStep()
+        new_value = self.slider.value() + step
+        if new_value <= self.slider.maximum():
+            self.slider.setValue(new_value)
+    
+    def step_down(self):
+        step = self.slider.singleStep()
+        new_value = self.slider.value() - step
+        if new_value >= self.slider.minimum():
+            self.slider.setValue(new_value)
+            
 class Slider(QSlider):
     def __init__(self, orientation):
         super().__init__(orientation)

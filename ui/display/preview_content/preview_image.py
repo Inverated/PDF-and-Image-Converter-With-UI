@@ -1,5 +1,5 @@
 from typing import override
-from ui.display.preview_item import PreviewItem
+from ui.display.preview_content.preview_item import PreviewItem
 from PySide6.QtWidgets import QLabel
 from ui.display.image import PixMap
 from PySide6.QtGui import QDrag

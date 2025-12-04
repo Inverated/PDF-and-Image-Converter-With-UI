@@ -1,8 +1,13 @@
-from ui.display.preview_item import PreviewItem
+from ui.display.preview_content.preview_item import PreviewItem
 
 from fitz import open as open_new_document, Document, Matrix, Page
 
 class Downloader:
+    quality: int = 0
+    
+    def __init__(self, quality: int = 0):
+        self.quality = quality
+        
     #no need to add signal for download progress, very fast
     def downloadFile(self, fileList:list[PreviewItem], save_location:str, scaled:bool = False):
         # returns (successful, message)
@@ -49,7 +54,8 @@ class Downloader:
                 mtx = Matrix(1, 1)
                 if fileList[0].extension == '.pdf':
                     #pdf very blurry otherwise
-                    mtx = Matrix(2, 2)
+                    zoom = 4 - self.quality
+                    mtx = Matrix(zoom, zoom)
                 pix = page.get_pixmap(matrix=mtx)
                 pix.save(save_location)
             else:

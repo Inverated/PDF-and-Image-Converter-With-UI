@@ -2,6 +2,7 @@ from os import path as path_of
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QStyle, QFileDialog, QSizePolicy, QFrame, QLabel, QCheckBox, QRadioButton
 from PySide6.QtCore import QSize, Signal
 
+from ui.display.preview_content.scroll_area import ScrollArea
 from ui.files.file import File
 
 class SideList(QWidget):
@@ -32,7 +33,7 @@ class SideList(QWidget):
         edit_row.addStretch()
         edit_row.addWidget(add_file_button)
         
-        selection_area = QScrollArea()
+        selection_area = ScrollArea()
         selection_area.setWidgetResizable(True)
         #selection_area.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
         container = QWidget()

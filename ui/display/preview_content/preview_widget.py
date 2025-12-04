@@ -1,13 +1,13 @@
 import time
-import heapq
 
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QScrollArea, QSizePolicy, QPushButton
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QSizePolicy, QPushButton
 from PySide6.QtCore import Signal, Qt
 from PySide6.QtGui import QDropEvent, QDragMoveEvent
 
 from ui.display.image import PixMap
 from ui.display.imageSizesTracker import ImageSizes
-from ui.display.preview_item import PreviewItem
+from ui.display.preview_content.scroll_area import ScrollArea
+from ui.display.preview_content.preview_item import PreviewItem
 from ui.display.size_slider import SizeSliderLayout
 
 from ui.display.imageTimer import ImageUpdateTimer
@@ -38,7 +38,7 @@ class Preview(QWidget):
         delAll.clicked.connect(self.__clearAllWidget)
         
         items = QVBoxLayout()
-        self.scroll_area = QScrollArea()
+        self.scroll_area = ScrollArea()
         self.scroll_bar = self.scroll_area.verticalScrollBar()
         self.scroll_area.setWidgetResizable(True)
         
@@ -60,6 +60,7 @@ class Preview(QWidget):
         self.compact_checkbox.stateChanged.connect(self.set_compact_view)
         
         self.size_slider = SizeSliderLayout(image_size=self.image_size)
+        self.scroll_area.setLinkedSlider(self.size_slider)
         
         self.timer = ImageUpdateTimer(interval=100)
         self.timer.valueStopped.connect(self.setFinalSizing)
@@ -416,3 +417,9 @@ class Preview(QWidget):
         
         return new_stack
         
+    def wheelEvent(self, event):
+        if event.modifiers() & Qt.ControlModifier:
+            delta = event.angleDelta().y()  # wheel vertical delta
+            self.size_slider.step_up() if delta > 0 else self.size_slider.step_down()
+        else:
+            super().wheelEvent(event)

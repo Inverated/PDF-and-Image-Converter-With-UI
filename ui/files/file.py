@@ -10,9 +10,9 @@ from PySide6.QtCore import QSize, Qt, QMimeData, Signal
 from PySide6.QtPdf import QPdfDocument, QPdfDocumentRenderOptions
 
 from ui.display.image import PixMap
-from ui.display.preview_image import PreviewImage
-from ui.display.preview_item import PreviewItem
-from ui.display.preview_pdf import PreviewPdf
+from ui.display.preview_content.preview_image import PreviewImage
+from ui.display.preview_content.preview_item import PreviewItem
+from ui.display.preview_content.preview_pdf import PreviewPdf
 
 class File(QWidget):
     renderComplete = Signal()

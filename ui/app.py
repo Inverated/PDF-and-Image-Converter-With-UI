@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QSplitter, QFil
 from PySide6.QtCore import Qt
 
 from backend.file_downloader import Downloader
-from ui.display.preview_widget import Preview
+from ui.display.preview_content.preview_widget import Preview
 from ui.files.file_tab_widget import SideList
 from ui.option_bar import OptionBar
 
@@ -20,11 +20,13 @@ class MainWindow(QMainWindow):
         self.full_extension_filter = "Pdf (*.pdf);; Image ({})".format(ext)
         
         
-        self.setWindowTitle("Test")
+        self.setWindowTitle("PDF and Image Converter")
+        self.image_quality = 0  # 0 - High, 1 - Medium, 2 - Low
         
         toolba = OptionBar()
         toolba.previewRequested.connect(self.set_preview_state)
-        toolba.darkThemeRequested.connect(self.set_theme)
+        toolba.darkThemeRequested.connect(lambda dark: self.darkMode.emit(dark))
+        toolba.imageQualityChanged.connect(lambda quality: setattr(self, 'image_quality', quality))
         self.addToolBar(toolba)
         layout = QHBoxLayout()
 
@@ -64,10 +66,6 @@ class MainWindow(QMainWindow):
         self.file_list_widget.setPreviewStatus(enable)
         return
     
-    def set_theme(self, dark:bool):
-        self.darkMode.emit(dark)
-        return
-    
     def setNormaliseChoice(self, choice):
         self.preview_list_widget.setNormaliseChoice(choice)
         return
@@ -96,7 +94,7 @@ class MainWindow(QMainWindow):
             #no error message, quit gracefully
             return
         
-        downloader = Downloader()
+        downloader = Downloader(self.image_quality)
         (status, message) = downloader.downloadFile(lis, selected_dir, self.preview_list_widget.isNormalised())
         
         self.file_list_widget.set_status_message(message, "green" if status else "red")

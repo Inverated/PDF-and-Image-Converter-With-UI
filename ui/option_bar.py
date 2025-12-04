@@ -5,6 +5,7 @@ from PySide6.QtCore import Signal
 class OptionBar(QToolBar):
     previewRequested = Signal(bool)
     darkThemeRequested = Signal(bool)
+    imageQualityChanged = Signal(int)
     
     def __init__(self):
         super().__init__("")
@@ -26,6 +27,12 @@ Disable to reduce memory usage (Must reupload to enable preview)"""
         self.theme_toggle.triggered.connect(self.set_theme)
         self.addAction(self.theme_toggle)
         
+        self.image_download_quality = QAction("Pdf to Image Quality: High", self)
+        self.image_download_quality.setToolTip("Set the quality of downloaded images")
+        self.image_quality = 1
+        self.image_download_quality.triggered.connect(self.cycle_image_quality)
+        self.addAction(self.image_download_quality)
+        
         self.set_preview(None)
         self.set_theme(None)
         
@@ -42,3 +49,17 @@ Disable to reduce memory usage (Must reupload to enable preview)"""
         
         txt = "Dark" if self.dark else "Light"
         self.theme_toggle.setText(txt)
+
+    def cycle_image_quality(self):
+        self.image_quality = (self.image_quality - 1) % 4
+        match self.image_quality:
+            case 0:
+                txt = "Pdf to Image Quality: Very High"
+            case 1:
+                txt = "Pdf to Image Quality: High"
+            case 2:
+                txt = "Pdf to Image Quality: Medium"
+            case 3:
+                txt = "Pdf to Image Quality: Low"
+        self.image_download_quality.setText(txt)
+        self.imageQualityChanged.emit(self.image_quality)
