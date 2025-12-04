@@ -4,6 +4,7 @@ from fitz import open as open_new_document, Document, Matrix, Page
 
 class Downloader:
     quality: int = 0
+    output = open_new_document()
     
     def __init__(self, quality: int = 0):
         self.quality = quality
@@ -18,8 +19,8 @@ class Downloader:
                 continue
             doc = self.open_file(each.full_path)
 
-            if doc == None:
-                return (False, "File not found at {}".format(each.full_path))
+            if doc is None:
+                return (False, f"File not found at {each.full_path}")
             opened_files[each.full_path] = doc
 
         self.output = open_new_document()
@@ -60,21 +61,19 @@ class Downloader:
                 pix.save(save_location)
             else:
                 self.output.save(save_location)
-            
-        except Exception as e:
-            #print(e)
+            return (True, "File saved at {}".format(save_location))      
+              
+        except Exception as _:
             return (False, "Unable to save at {}".format(save_location))   
         finally:
             self.close_all_files(opened_files) 
-            return (True, "File saved at {}".format(save_location))
-        
+
     def open_file(self, path):
         try:
             return open_new_document(path) 
-        except Exception as e:
-            #print(e)
+        except Exception as _:
             return None
-    
+
     def close_all_files(self, doc_list:dict[str, Document]):
         self.output.close()
         for each in doc_list.values():

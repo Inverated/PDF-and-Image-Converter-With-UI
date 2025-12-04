@@ -39,13 +39,9 @@ class SizeSliderLayout(QHBoxLayout):
         if new_value >= self.slider.minimum():
             self.slider.setValue(new_value)
             
-class Slider(QSlider):
-    def __init__(self, orientation):
-        super().__init__(orientation)
-    
+class Slider(QSlider):   
     def mouseReleaseEvent(self, ev):
         super().mouseReleaseEvent(ev)
         step = self.singleStep()
         snapped = round(self.value() / step) * step
         self.setValue(snapped)
-    

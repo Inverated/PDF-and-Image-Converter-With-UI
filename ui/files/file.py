@@ -79,8 +79,8 @@ class File(QWidget):
         self.setFileName()
         if self.renderImage and self.drag_image == None:
             if self.render_attempt == 3:
-                self.label2.setText("Unable to render image, please upload again") 
-                self.label2.setStyleSheet("color: red")  
+                self.label2.setText("Unable to render image, please upload again")
+                self.label2.setStyleSheet("color: red")
             else:
                 #print("Fail " + str(self.render_attempt))
                 self.__re_render()
@@ -100,13 +100,13 @@ class File(QWidget):
         
     def convert_to_list(self):
         if self.extension == '.pdf':
-            self.image_list = self.__convert_pdf_to_list()        
+            self.image_list = self.__convert_pdf_to_list()
         else:
             self.image_list = self.__convert_image_to_list()
         self.renderComplete.emit()
 
     def __set_drag_image(self) -> bool:
-        if self.image_list == None or len(self.image_list) == 0:
+        if self.image_list is None or len(self.image_list) == 0:
             return
 
         cover_image = self.image_list[0].image_label
@@ -129,17 +129,17 @@ class File(QWidget):
             self.drag_image = bg
               
     def setFileName(self):      
-        if self.page_count == -1 or (self.renderImage and self.drag_image == None):
-            self.label.setText("{}{}".format(self.document_name, self.extension)) 
+        if self.page_count == -1 or (self.renderImage and self.drag_image is None):
+            self.label.setText(f"{self.document_name}{self.extension}")
             self.label.setStyleSheet("color: grey")
-            self.label2.setText("{}{}".format("Loading...", self.curr_page_no)) 
-            self.label2.setStyleSheet("color: grey")    
+            self.label2.setText(f"Loading...{self.curr_page_no}")
+            self.label2.setStyleSheet("color: grey")
         else:
-            self.label.setText("{}{}".format(self.document_name, self.extension))
+            self.label.setText(f"{self.document_name}{self.extension}")
             self.label.setStyleSheet("")
-            self.label2.setText("{}\t{:>5} page(s)".format("" if self.renderImage else "[Preview disabled]", self.page_count))
-            self.label2.setStyleSheet("")  
-            self.hasDisabledRender = True  
+            self.label2.setText(f"{'' if self.renderImage else '[Preview disabled]'}\t{self.page_count:>5} page(s)")
+            self.label2.setStyleSheet("")
+            self.hasDisabledRender = True
 
     
     def __convert_image_to_list(self) -> list[PreviewItem]:
@@ -191,8 +191,7 @@ class File(QWidget):
                                           image=pixmap))
             try:
                 self.renderProgress.emit(page_no)
-            except:
-                #print("App forcefully quit")
+            except Exception:
                 return #app quit
             
         doc.deleteLater()
@@ -209,7 +208,7 @@ class File(QWidget):
             mime.setText(self.label.text() + self.label2.text())
             drag.setMimeData(mime)
             
-            if self.renderImage and not self.hasDisabledRender and self.drag_image == None:
+            if self.renderImage and not self.hasDisabledRender and self.drag_image is None:
                 #print("Image not rendered properly")
                 self.end_thread()
                 return

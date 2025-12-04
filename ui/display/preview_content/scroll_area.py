@@ -16,10 +16,10 @@ class ScrollArea(QScrollArea):
                     self.linked_slider.step_down()
         elif event.modifiers() & Qt.ShiftModifier:
             delta = event.angleDelta().y()  # wheel vertical delta
-            bar = self.horizontalScrollBar()
-            bar.setValue(bar.value() - delta)
+            scroll_bar = self.horizontalScrollBar()
+            scroll_bar.setValue(scroll_bar.value() - delta)
         else:
             super().wheelEvent(event)
             
-    def setLinkedSlider(self, slider):
+    def setLinkedSlider(self, slider: SizeSliderLayout):
         self.linked_slider = slider

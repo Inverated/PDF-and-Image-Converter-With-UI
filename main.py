@@ -1,5 +1,4 @@
 import sys
-import qdarktheme
 
 from PySide6.QtWidgets import QApplication
 
@@ -13,7 +12,7 @@ def main():
     window = MainWindow()
     app.setPalette(create_dark_palette())
     window.darkMode.connect(lambda isDark: app.setPalette(create_light_palette() if not isDark else create_dark_palette()))
-    
+
     window.resize(809, 500)
     window.show()
     app.exec()

@@ -3,7 +3,7 @@ from PySide6.QtCore import Qt
 
 class PixMap():
     def __init__(self, q_image:QImage, width, height):
-        self.image = QPixmap.fromImage(q_image) if q_image != None else None
+        self.image = QPixmap.fromImage(q_image) if q_image is not None else None
         self.width = width
         self.height = height
         self.normWidth = width

@@ -39,7 +39,7 @@ class PreviewPdf(PreviewItem):
     def setImage(self):
         image_label = QLabel()
         scaled = self.image.scaled(self.curr_size)
-        if scaled != None:
+        if scaled is not None:
             image_label.setPixmap(scaled)
             image_label.setFixedSize(scaled.size())
         return image_label
@@ -50,7 +50,7 @@ class PreviewPdf(PreviewItem):
             return
         self.curr_size = new_size
         scaled = self.image.scaled(new_size)
-        if scaled != None:
+        if scaled is not None:
             self.image_label.setPixmap(scaled)
             self.image_label.setFixedSize(scaled.size())
         
@@ -71,6 +71,6 @@ class PreviewPdf(PreviewItem):
             drag = QDrag(self)
             mime = QMimeData()
             drag.setMimeData(mime)
-            if self.drag_image != None:
+            if self.drag_image is not None:
                 drag.setPixmap(self.drag_image)
             drag.exec(Qt.DropAction.MoveAction)

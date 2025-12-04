@@ -17,7 +17,7 @@ class MainWindow(QMainWindow):
         
         formats = ('png', 'pnm', 'pgm', 'ppm', 'pbm', 'pam', 'psd', 'ps', 'jpg', 'jpeg')
         ext = " ".join(f"*.{ext}" for ext in formats)
-        self.full_extension_filter = "Pdf (*.pdf);; Image ({})".format(ext)
+        self.full_extension_filter = f"Pdf (*.pdf);; Image ({ext})"
         
         
         self.setWindowTitle("PDF and Image Converter")
@@ -25,7 +25,7 @@ class MainWindow(QMainWindow):
         
         toolba = OptionBar()
         toolba.previewRequested.connect(self.set_preview_state)
-        toolba.darkThemeRequested.connect(lambda dark: self.darkMode.emit(dark))
+        toolba.darkThemeRequested.connect(self.darkMode)
         toolba.imageQualityChanged.connect(lambda quality: setattr(self, 'image_quality', quality))
         self.addToolBar(toolba)
         layout = QHBoxLayout()
@@ -88,8 +88,8 @@ class MainWindow(QMainWindow):
         self.download_file(compacted_list, "Pdf (*.pdf)")
         return
 
-    def download_file(self, lis, filter):
-        selected_dir = self.get_download_dir(filter)
+    def download_file(self, lis, download_filter):
+        selected_dir = self.get_download_dir(download_filter)
         if selected_dir == "":
             #no error message, quit gracefully
             return
@@ -102,9 +102,8 @@ class MainWindow(QMainWindow):
         del downloader
         return
     
-    def get_download_dir(self, filter):
+    def get_download_dir(self, download_filter):
         dialog = QFileDialog()
-        selected_dir = dialog.getSaveFileName(None, "Save file", self.prev_open_dir if self.prev_open_dir else None, filter=filter)
+        selected_dir = dialog.getSaveFileName(None, "Save file", self.prev_open_dir if self.prev_open_dir else None, filter=download_filter)
         dialog.deleteLater()
         return selected_dir[0]
-        

@@ -28,7 +28,7 @@ class Preview(QWidget):
         self.skipUpdate = False
         self.image_sizes_list = ImageSizes()
         
-        self.setAcceptDrops(True)  
+        self.setAcceptDrops(True)
         layout = QVBoxLayout()
         
         option_bar2 = QHBoxLayout()
@@ -110,7 +110,8 @@ class Preview(QWidget):
     def setNormaliseChoice(self, choice:bool):
         if self.normalisedWidth != choice:
             self.normalisedWidth = choice
-            self.previewNormalised(self.normalisedState) if self.normalisedState != 0 else None
+            if self.normalisedState != 0:
+                self.previewNormalised(self.normalisedState)
     
     def __normaliseImage(self, preview_item_wid:PreviewItem):
         preview_item_image:PixMap = preview_item_wid.getImage()
@@ -242,14 +243,7 @@ class Preview(QWidget):
         self.__reset_page_no()
         self.implementWidgetConnection()
         return
-    
-    '''def __clear_unused_widget_stack(self, new_stack):
-        while self.widget_stack.count():
-            item = self.widget_stack.takeAt(0)
-            widget = item.widget()
-            if widget is not None and widget not in new_stack:
-                widget.setParent(None) '''
-                
+
     def dragEnterEvent(self, event):
         event.accept()
     
@@ -330,7 +324,7 @@ class Preview(QWidget):
                 if self.previewStatus:
                     item_copy:PreviewItem = item.copyOf()
                 else:
-                    item_copy:PreviewItem = item.disablePreview()    
+                    item_copy:PreviewItem = item.disablePreview()
                 item_copy.update_image_size(self.image_size)
                 self.widget_stack.insertWidget(n + i, item_copy)
                 self.__normaliseImage(item)
@@ -398,19 +392,7 @@ class Preview(QWidget):
         if self.widget_stack.count() == 0:
             # add prompt user 
             return []
-        
-        #start:PreviewItem = self.widget_stack.itemAt(0).widget().copyOf()
         new_stack:list[PreviewItem] = []
-        
-        """ for i in range(1, self.widget_stack.count()):
-            curr_item:PreviewItem = self.widget_stack.itemAt(i).widget()
-            if curr_item.document_name == start.document_name and curr_item.document_page_range[0] == start.document_page_range[1] + 1:
-                start = start.compact(curr_item)
-            else:
-                new_stack.append(start)
-                start = curr_item.copyOf()
-        if start not in new_stack:
-            new_stack.append(start) """
             
         for i in range(0, self.widget_stack.count()):
             new_stack.append(self.widget_stack.itemAt(i).widget())

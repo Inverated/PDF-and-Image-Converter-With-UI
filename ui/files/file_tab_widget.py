@@ -11,7 +11,7 @@ class SideList(QWidget):
     normaliseChoice = Signal(bool)
     
     def __init__(self):
-        super().__init__()     
+        super().__init__()
         self.prev_open_dir = None    #re open open file from same dir
         self.setMinimumWidth(250)   #cannot shrink below
         self.setAcceptDrops(True)
@@ -102,7 +102,7 @@ class SideList(QWidget):
         
     def set_status_message(self, message, color):
         self.status.setText(message)
-        self.status.setStyleSheet("color: {};".format(color))
+        self.status.setStyleSheet(f"color: {color};")
         
     def add_files(self):
         dialog = QFileDialog()

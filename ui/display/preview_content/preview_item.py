@@ -88,12 +88,12 @@ class PreviewItem(QWidget):
     def remove_clicked(self):
         return self.removeRequested.emit(self)
     
-    def compact(self, next):
-        self.document_page_range = [self.document_page_range[0], next.document_page_range[1]] 
+    def compact(self, next_widget:"PreviewItem"):
+        self.document_page_range = [self.document_page_range[0], next_widget.document_page_range[1]] 
         if self.contains == None:
-            self.contains = [next]
+            self.contains = [next_widget]
         else:
-            self.contains.append(next)
+            self.contains.append(next_widget)
         self.__set_title()
         return self
     
