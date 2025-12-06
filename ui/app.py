@@ -1,7 +1,9 @@
+from time import sleep as i_want_to_sleep
 from PySide6.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QSplitter, QFileDialog
 from PySide6.QtCore import Qt
 
 from backend.file_downloader import Downloader
+from ui.display.popup_thing import Popup
 from ui.display.preview_content.preview_widget import Preview
 from ui.files.file_tab_widget import SideList
 from ui.option_bar import OptionBar
@@ -81,6 +83,7 @@ class MainWindow(QMainWindow):
         return
     
     def download_clicked(self):
+        Popup()
         self.file_list_widget.set_status_message("", "white")
         compacted_list = self.preview_list_widget.get_simplified()
         if len(compacted_list) == 0:
@@ -105,20 +108,25 @@ class MainWindow(QMainWindow):
 
     def download_folder_clicked(self):
         self.file_list_widget.set_status_message("", "white")
+        directory = self.get_download_folder()
+        if directory == "":
+            #no error message, quit gracefully
+            return
+
         compacted_list = self.preview_list_widget.get_simplified()
+        
         if len(compacted_list) == 0:
             self.file_list_widget.set_status_message("No files selected", "red")
             return
         
-        directory = self.get_download_folder()
+        
         downloader = Downloader(self.image_quality, self.chosen_image_format)
             
         (status, message) = downloader.downloadFile(compacted_list, directory, self.preview_list_widget.isNormalised())
 
         self.file_list_widget.set_status_message(message, "green" if status else "red")
-        self.preview_list_widget.revert_compact_view()
         del downloader
-    
+
     def get_download_dir(self, download_filter):
         dialog = QFileDialog()
         selected_dir = dialog.getSaveFileName(None, "Save file", self.prev_open_dir if self.prev_open_dir else None, filter=download_filter)

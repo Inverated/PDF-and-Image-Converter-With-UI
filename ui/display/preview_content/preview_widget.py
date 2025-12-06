@@ -390,6 +390,7 @@ class Preview(QWidget):
         
     def get_simplified(self):
         self.set_compact_view(0)
+        self.compact_checkbox.setChecked(False)
         if self.widget_stack.count() == 0:
             # add prompt user 
             return []
@@ -399,10 +400,6 @@ class Preview(QWidget):
             new_stack.append(self.widget_stack.itemAt(i).widget())
         
         return new_stack
-    
-    def revert_compact_view(self):
-        if self.compact_checkbox.isChecked():
-            self.__compactList()
         
     def wheelEvent(self, event):
         if event.modifiers() & Qt.ControlModifier:
