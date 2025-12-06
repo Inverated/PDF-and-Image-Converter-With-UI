@@ -3,7 +3,7 @@ import sys
 from PySide6.QtWidgets import QApplication
 from palettes import create_dark_palette, create_light_palette
 from ui.app import MainWindow
-//made by kqf
+#made by kqf
 
 def main():
     app = QApplication(sys.argv)

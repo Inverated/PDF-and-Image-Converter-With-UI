@@ -112,11 +112,11 @@ class MainWindow(QMainWindow):
         
         directory = self.get_download_folder()
         downloader = Downloader(self.image_quality, self.chosen_image_format)
-
+            
         (status, message) = downloader.downloadFile(compacted_list, directory, self.preview_list_widget.isNormalised())
 
         self.file_list_widget.set_status_message(message, "green" if status else "red")
-
+        self.preview_list_widget.revert_compact_view()
         del downloader
     
     def get_download_dir(self, download_filter):
