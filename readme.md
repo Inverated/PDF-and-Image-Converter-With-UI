@@ -4,12 +4,16 @@
 
 ## Description
 
+version 2 of something i made 5 years ago: PDF-and-Image-Converter. No ui, entire code in a single file and exe does not work
+
+Now
 - Can upload files by selecting in file explorer or drag and drop
 - Reorder existing files / pages in pdfs
 - Compact files to show grouped pages for easy reordering
 - Download pages individually
 - Download all as pdf or images
-- Image download can specify download quality
+- Image download can toggle download quality
+- Disable preview if working with very large file
 
 ---
 
