@@ -1,6 +1,6 @@
 from time import sleep as i_want_to_sleep
 from PySide6.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QSplitter, QFileDialog
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QThread
 
 from backend.file_downloader import Downloader
 from ui.display.popup_thing import Popup
@@ -16,6 +16,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.prev_open_dir = None
+        self.popup = None
         
         formats = ('png', 'pnm', 'pgm', 'ppm', 'pbm', 'pam', 'psd', 'ps', 'jpg', 'jpeg')
         ext = " ".join(f"*.{ext}" for ext in formats)
@@ -24,6 +25,8 @@ class MainWindow(QMainWindow):
         
         self.setWindowTitle("PDF and Image Converter")
         self.image_quality = 0  # 0 - High, 1 - Medium, 2 - Low
+        
+        self.downloader = Downloader(self.image_quality, self.chosen_image_format)
         
         toolba = OptionBar()
         toolba.previewRequested.connect(self.set_preview_state)
@@ -83,7 +86,6 @@ class MainWindow(QMainWindow):
         return
     
     def download_clicked(self):
-        Popup()
         self.file_list_widget.set_status_message("", "white")
         compacted_list = self.preview_list_widget.get_simplified()
         if len(compacted_list) == 0:
@@ -99,12 +101,11 @@ class MainWindow(QMainWindow):
             #no error message, quit gracefully
             return
         
-        downloader = Downloader(self.image_quality, self.chosen_image_format)
-        (status, message) = downloader.downloadFile(lis, selected_dir, self.preview_list_widget.isNormalised())
+        self.downloader.update(self.image_quality, self.chosen_image_format)
+        
+        (status, message) = self.downloader.downloadFile(lis, selected_dir, self.preview_list_widget.isNormalised())
         
         self.file_list_widget.set_status_message(message, "green" if status else "red")
-
-        del downloader
 
     def download_folder_clicked(self):
         self.file_list_widget.set_status_message("", "white")
@@ -119,13 +120,11 @@ class MainWindow(QMainWindow):
             self.file_list_widget.set_status_message("No files selected", "red")
             return
         
+        self.downloader.update(self.image_quality, self.chosen_image_format)
         
-        downloader = Downloader(self.image_quality, self.chosen_image_format)
-            
-        (status, message) = downloader.downloadFile(compacted_list, directory, self.preview_list_widget.isNormalised())
+        (status, message) = self.downloader.downloadFile(compacted_list, directory, self.preview_list_widget.isNormalised())
 
         self.file_list_widget.set_status_message(message, "green" if status else "red")
-        del downloader
 
     def get_download_dir(self, download_filter):
         dialog = QFileDialog()
