@@ -22,7 +22,8 @@
 
 ## Run
 
-Download and run the exe in executable/dist
+Download and run the exe in executable/dist. Will have certificate warning
+
 
 ---
 
