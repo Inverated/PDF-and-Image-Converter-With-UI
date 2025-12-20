@@ -1,9 +1,7 @@
-from time import sleep as i_want_to_sleep
 from PySide6.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QSplitter, QFileDialog
-from PySide6.QtCore import Qt, QThread
+from PySide6.QtCore import Qt
 
 from backend.file_downloader import Downloader
-from ui.display.popup_thing import Popup
 from ui.display.preview_content.preview_widget import Preview
 from ui.files.file_tab_widget import SideList
 from ui.option_bar import OptionBar
@@ -16,7 +14,6 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.prev_open_dir = None
-        self.popup = None
         
         formats = ('png', 'pnm', 'pgm', 'ppm', 'pbm', 'pam', 'psd', 'ps', 'jpg', 'jpeg')
         ext = " ".join(f"*.{ext}" for ext in formats)

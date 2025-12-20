@@ -43,7 +43,11 @@ pip install -r requirements.txt
 # Running the program
 python main.py
 
-# Convert to executable
-pyinstaller main.py --name "Pdf and Image Converter" --onefile --windowed --icon=static/app.ico
+# Convert to executable (In the virtual environment)
+pip install PySide6 pyinstaller
+python -m PyInstaller main.py --name "Pdf and Image Converter" --onefile --windowed --icon=static/app.ico
+
+python -m PyInstaller main.py --name "Pdf and Image Converter" --windowed --icon=static/app.ico
+
 Generated folders: dist, build
 Generated file: .spec
