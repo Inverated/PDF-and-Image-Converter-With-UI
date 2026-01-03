@@ -47,7 +47,7 @@ Disable to reduce memory usage (Must reupload to enable preview)"""
         self.dark = not self.dark
         self.darkThemeRequested.emit(self.dark)
         
-        txt = "Dark" if self.dark else "Light"
+        txt = "Dark" if self.dark else "Flashbang"
         self.theme_toggle.setText(txt)
 
     def cycle_image_quality(self):
