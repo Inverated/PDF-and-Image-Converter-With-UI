@@ -55,5 +55,5 @@ python -m PyInstaller main.py --name "Pdf and Image Converter" --onefile --windo
 python -m PyInstaller main.py --name "Pdf and Image Converter" --windowed --icon=static/app.ico
 ```
 
-Generated folders: dist, build (Contains the .exe file)
-Generated file: .spec
+- Generated folders: dist, build (Contains the .exe file) 
+- Generated file: .spec
