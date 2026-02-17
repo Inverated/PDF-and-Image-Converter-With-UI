@@ -1,12 +1,11 @@
-from PySide6.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QSplitter, QFileDialog
-from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QSplitter, QFileDialog, QApplication
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QKeySequence
 
 from backend.file_downloader import Downloader
 from ui.display.preview_content.preview_widget import Preview
 from ui.files.file_tab_widget import SideList
 from ui.option_bar import OptionBar
-
-from PySide6.QtCore import Signal
 
 class MainWindow(QMainWindow):
     darkMode = Signal(bool)
@@ -15,8 +14,8 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.prev_open_dir = None
         
-        formats = ('png', 'pnm', 'pgm', 'ppm', 'pbm', 'pam', 'psd', 'ps', 'jpg', 'jpeg')
-        ext = " ".join(f"*.{ext}" for ext in formats)
+        self.formats = ('png', 'pnm', 'pgm', 'ppm', 'pbm', 'pam', 'psd', 'ps', 'jpg', 'jpeg')
+        ext = " ".join(f"*.{ext}" for ext in self.formats)
         self.full_extension_filter = f"Pdf (*.pdf);; Image ({ext})"
         self.chosen_image_format = "png"
         
@@ -37,7 +36,7 @@ class MainWindow(QMainWindow):
         splitter.show()
         
         self.preview_list_widget = Preview()
-        self.file_list_widget = SideList(formats)
+        self.file_list_widget = SideList(self.formats)
         
         self.preview_list_widget.downloadItem.connect(self.download_individual)
         self.file_list_widget.downloadFile.connect(self.download_clicked)
@@ -134,3 +133,11 @@ class MainWindow(QMainWindow):
         selected_dir = dialog.getExistingDirectory(None, "Select folder to save files", self.prev_open_dir if self.prev_open_dir else None)
         dialog.deleteLater()
         return selected_dir
+    
+    def keyPressEvent(self, event):
+        if event.matches(QKeySequence.Paste):
+            clipboard = QApplication.clipboard()
+            mimedata = clipboard.mimeData()
+            self.file_list_widget.paste_files(mimedata)
+            return
+        return super().keyPressEvent(event)

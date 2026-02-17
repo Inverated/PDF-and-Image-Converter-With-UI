@@ -1,6 +1,7 @@
 import threading
 
 from os.path import splitext
+from pathlib import Path
 
 from time import sleep as i_want_to_sleep
 
@@ -39,8 +40,9 @@ class File(QWidget):
         
         self.path_name = path_name
         basename, self.extension = splitext(path_name)
+
         self.extension = self.extension.lower()
-        self.document_name = basename.split('/')[-1]
+        self.document_name = Path(basename).name
         
         # Label tab with name (Create the label before thread as file name will be updated)
         self.label = QLabel()

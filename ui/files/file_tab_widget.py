@@ -1,9 +1,11 @@
 from os import path as path_of
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QStyle, QFileDialog, QSizePolicy, QFrame, QLabel, QCheckBox, QRadioButton, QComboBox
-from PySide6.QtCore import QSize, Signal
+from PySide6.QtCore import QSize, Signal, QMimeData
 
 from ui.display.preview_content.scroll_area import ScrollArea
 from ui.files.file import File
+
+import tempfile
 
 class SideList(QWidget):
     downloadFile = Signal()
@@ -131,7 +133,22 @@ class SideList(QWidget):
         self.prev_open_dir = path_of.dirname(selected[0][0])
 
         for path in selected[0]:
+            print(path)
             self.__addToStack(File(path, self.previewStatus))
+    
+    def paste_files(self, mimedata: QMimeData):
+        if mimedata.hasUrls():
+            for url in mimedata.urls():
+                url = url.toLocalFile()
+                _, ext = path_of.splitext(url)
+                if ext.lower() in ('.pdf',) + tuple(f".{e}" for e in self.image_extensions):
+                    self.__addToStack(File(url, self.previewStatus))
+        if mimedata.hasImage():
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+            temp_path = temp_file.name
+            temp_file.close()
+            mimedata.imageData().save(temp_path)
+            self.__addToStack(File(temp_path, self.previewStatus))
             
     def dragEnterEvent(self, event):
         event.accept()
