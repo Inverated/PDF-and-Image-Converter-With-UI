@@ -14,7 +14,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.prev_open_dir = None
         
-        self.formats = ('png', 'pnm', 'pgm', 'ppm', 'pbm', 'pam', 'psd', 'ps', 'jpg', 'jpeg')
+        self.formats = ('png', 'jpg', 'jpeg', 'svg', 'ico', 'pnm', 'pgm', 'ppm', 'pbm', 'pam', 'psd', 'ps')
         ext = " ".join(f"*.{ext}" for ext in self.formats)
         self.full_extension_filter = f"Pdf (*.pdf);; Image ({ext})"
         self.chosen_image_format = "png"

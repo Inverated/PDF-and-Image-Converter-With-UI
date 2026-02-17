@@ -1,5 +1,5 @@
 from os import path as path_of
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QStyle, QFileDialog, QSizePolicy, QFrame, QLabel, QCheckBox, QRadioButton, QComboBox
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QStyle, QFileDialog, QSizePolicy, QFrame, QLabel, QCheckBox, QRadioButton, QComboBox
 from PySide6.QtCore import QSize, Signal, QMimeData
 
 from ui.display.preview_content.scroll_area import ScrollArea
@@ -96,7 +96,8 @@ class SideList(QWidget):
         dropdown = QComboBox()
         dropdown.currentTextChanged.connect(self.changeImageFormat.emit)
         for fmt in self.image_extensions:
-            dropdown.addItem(fmt)
+            if fmt not in ['svg', 'ico']:
+                dropdown.addItem(fmt)
         save_images.addWidget(save_image_button)
         save_images.addWidget(dropdown)
         
@@ -133,7 +134,6 @@ class SideList(QWidget):
         self.prev_open_dir = path_of.dirname(selected[0][0])
 
         for path in selected[0]:
-            print(path)
             self.__addToStack(File(path, self.previewStatus))
     
     def paste_files(self, mimedata: QMimeData):
