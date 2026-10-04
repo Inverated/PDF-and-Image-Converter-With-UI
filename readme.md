@@ -37,6 +37,9 @@ Seting up virtual environment
 ```bash
 python -m venv venv
 
+# Entering virtual environment
+venv\Scripts\activate.bat
+
 # Install dependencies
 pip install -r requirements.txt
 

@@ -288,8 +288,15 @@ class Preview(QWidget):
             n += 1
         return n
     
+    def addFileWidget(self, widget:File):
+        if isinstance(widget, File):
+            widget.convert_to_list()
+            self.__addFromFile(widget)
+            self.__reset_page_no()
+        
     def dropEvent(self, event:QDropEvent):
         widget = event.source()
+        print(f"Drop event from {widget}")
         if isinstance(widget, File):
             self.__addFromFileList(event)
         elif isinstance(widget, PreviewItem):
@@ -304,7 +311,14 @@ class Preview(QWidget):
 
         if self.widget_stack.count() == 0:
             n = 0
+        
+        self.__addToList(widget, n)
+    
+    def __addFromFile(self, widget:File):
+        current_list_size = self.widget_stack.count()
+        self.__addToList(widget, current_list_size)
 
+    def __addToList(self, widget:PreviewItem, n:int):
         if self.compact_checkbox.isChecked():
             for item in widget.image_list:
                 self.image_sizes_list.add_size(item.image.getWidth(), item.image.getHeight())

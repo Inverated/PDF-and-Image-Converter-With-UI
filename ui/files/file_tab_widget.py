@@ -13,6 +13,7 @@ class SideList(QWidget):
     normaliseRequest = Signal(int)
     normaliseChoice = Signal(bool)
     changeImageFormat = Signal(str)
+    addAllToPreview = Signal()
     
     def __init__(self, image_extensions):
         super().__init__()
@@ -27,6 +28,10 @@ class SideList(QWidget):
 
         # Top row
         edit_row = QHBoxLayout()
+        add_all_file_button = QPushButton("Add All Files")
+        add_all_file_button.clicked.connect(self.__move_uploaded_files_to_preview)
+        
+        
         add_file_button = QPushButton()
         
         folder_icon = QStyle.StandardPixmap.SP_DirOpenIcon
@@ -36,6 +41,7 @@ class SideList(QWidget):
         add_file_button.setIcon(icon)
         add_file_button.clicked.connect(self.add_files)
         
+        edit_row.addWidget(add_all_file_button)
         edit_row.addStretch()
         edit_row.addWidget(add_file_button)
         
@@ -195,7 +201,9 @@ class SideList(QWidget):
         for item in files:
             self.__addToStack(item)'''
             
-            
+    def __move_uploaded_files_to_preview(self):
+        self.addAllToPreview.emit()
+    
     def __addToStack(self, item:File):
         self.file_stack.addWidget(item)
         
@@ -221,6 +229,13 @@ class SideList(QWidget):
     def __save_into_folder(self):
         self.downloadFolder.emit()
 
+    def get_all_files(self):
+        files = []
+        for i in range(0, self.file_stack.count(), 2):
+            file:File = self.file_stack.itemAt(i).widget()
+            files.append(file)
+        return files
+    
     def dropEvent(self, event):
         for url in event.mimeData().urls():
             url = url.toLocalFile()

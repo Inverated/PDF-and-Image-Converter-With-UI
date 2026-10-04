@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QSplitter, QFileDialog, QApplication
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QKeySequence
+from PySide6.QtGui import QKeySequence, QDropEvent
 
 from backend.file_downloader import Downloader
 from ui.display.preview_content.preview_widget import Preview
@@ -44,6 +44,7 @@ class MainWindow(QMainWindow):
         self.file_list_widget.normaliseRequest.connect(self.normaliseImages)
         self.file_list_widget.normaliseChoice.connect(self.setNormaliseChoice)
         self.file_list_widget.changeImageFormat.connect(lambda fmt: setattr(self, 'chosen_image_format', fmt))
+        self.file_list_widget.addAllToPreview.connect(self.add_drop_event)
         
         splitter.addWidget(self.preview_list_widget)
         splitter.addWidget(self.file_list_widget)
@@ -141,3 +142,8 @@ class MainWindow(QMainWindow):
             self.file_list_widget.paste_files(mimedata)
             return
         return super().keyPressEvent(event)
+    
+    def add_drop_event(self):
+        widget_list = self.file_list_widget.get_all_files()
+        for widget in widget_list:
+            self.preview_list_widget.addFileWidget(widget)

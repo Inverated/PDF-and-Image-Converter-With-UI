@@ -6,8 +6,8 @@ from pathlib import Path
 from time import sleep as i_want_to_sleep
 
 from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout, QStyle, QPushButton
-from PySide6.QtGui import QImage, QDrag, QPainter, QPixmap
-from PySide6.QtCore import QSize, Qt, QMimeData, Signal
+from PySide6.QtGui import QDropEvent, QImage, QDrag, QPainter, QPixmap
+from PySide6.QtCore import QPointF, QSize, Qt, QMimeData, Signal
 from PySide6.QtPdf import QPdfDocument, QPdfDocumentRenderOptions
 
 from ui.display.image import PixMap
